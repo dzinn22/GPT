@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZR GPT</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#000,#020617,#0a0f2c);
+  color:white;
+}
+
+/* layout */
+.top{height:50px;background:#020617;display:flex;align-items:center;padding:10px}
+.chat{height:calc(100vh - 50px);display:flex;flex-direction:column}
+.messages{flex:1;overflow:auto;padding:10px}
+.msg{padding:10px;margin:5px;border-radius:10px;max-width:75%}
+.user{background:#2563eb;margin-left:auto}
+.ai{background:#020617;border:1px solid #1e3a8a}
+
+/* input */
+.input{display:flex;padding:10px;gap:5px}
+.input input{flex:1;padding:10px;background:#0f172a;border:none;color:white;border-radius:10px}
+.btn{width:45px;height:45px;background:#1e293b;border:none;border-radius:10px;color:white}
+
+/* login */
+.login{
+ position:fixed;inset:0;background:black;
+ display:flex;align-items:center;justify-content:center
+}
+.box{background:#020617;padding:20px;border-radius:10px}
+</style>
+</head>
+
+<body>
+
+<div class="login" id="login">
+  <div class="box">
+    <h2>Login</h2>
+    <input id="user"><br><br>
+    <button onclick="login()">Entrar</button>
+  </div>
+</div>
+
+<div class="top">ZR GPT</div>
+
+<div class="chat">
+  <div class="messages" id="messages"></div>
+
+  <div class="input">
+    <button class="btn" onclick="file.click()">+</button>
+    <input type="file" id="file" hidden onchange="upload(event)">
+
+    <button class="btn" onclick="audio()">🎤</button>
+
+    <input id="text">
+
+    <button class="btn" onclick="send()">↑</button>
+  </div>
+</div>
+
+<script>
+let messages=[];
+
+/* login */
+async function login(){
+ let user=document.getElementById("user").value;
+
+ let res=await fetch("http://SEU-IP:3000/login",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({username:user})
+ });
+
+ let data=await res.json();
+ localStorage.setItem("token",data.token);
+ loginDiv.style.display="none";
+}
+
+/* render */
+function render(){
+ messagesDiv.innerHTML="";
+ messages.forEach(m=>{
+  let d=document.createElement("div");
+  d.className="msg "+m.role;
+  d.innerText=m.content;
+  messagesDiv.appendChild(d);
+ });
+}
+
+/* send */
+async function send(){
+ let input=document.getElementById("text");
+ if(!input.value)return;
+
+ messages.push({role:"user",content:input.value});
+ input.value="";
+ messages.push({role:"ai",content:"..."});
+ render();
+
+ let res=await fetch("http://SEU-IP:3000/chat",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({
+   token:localStorage.getItem("token"),
+   messages:messages.map(m=>({
+    role:m.role==="ai"?"assistant":"user",
+    content:m.content
+   }))
+  })
+ });
+
+ let data=await res.json();
+ messages[messages.length-1].content=data.choices[0].message.content;
+ render();
+}
+
+/* upload */
+function upload(e){
+ let f=e.target.files[0];
+ messages.push({role:"user",content:"📎 "+f.name});
+ render();
+}
+
+/* audio */
+function audio(){
+ let r=new (webkitSpeechRecognition||SpeechRecognition)();
+ r.lang="pt-BR";
+ r.onresult=e=>{
+  text.value=e.results[0][0].transcript;
+ };
+ r.start();
+}
+
+/* init */
+window.onload=()=>{
+ window.messagesDiv=document.getElementById("messages");
+ window.loginDiv=document.getElementById("login");
+};
+</script>
+
+</body>
+</html>
