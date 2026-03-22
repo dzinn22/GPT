@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 const SECRET = "zr_secret";
-const API_KEY = "SUA_API_KEY";
+const API_KEY = "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";
 
 /* login */
 app.post("/login",(req,res)=>{
