@@ -7,141 +7,905 @@
 
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Arial;
-  background:linear-gradient(135deg,#000,#020617,#0a0f2c);
-  color:white;
+
+:root{
+ --bg:#f7f7fb;
+ --card:#ffffff;
+ --text:#0f172a;
+ --muted:#64748b;
+ --border:#e2e8f0;
+ --blue:#2563eb;
+ --blue2:#1d4ed8;
+ --shadow:0 10px 30px rgba(2,6,23,.08);
 }
 
-/* layout */
-.top{height:50px;background:#020617;display:flex;align-items:center;padding:10px}
-.chat{height:calc(100vh - 50px);display:flex;flex-direction:column}
-.messages{flex:1;overflow:auto;padding:10px}
-.msg{padding:10px;margin:5px;border-radius:10px;max-width:75%}
-.user{background:#2563eb;margin-left:auto}
-.ai{background:#020617;border:1px solid #1e3a8a}
+body{
+ margin:0;
+ font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+ background:var(--bg);
+ color:var(--text);
+ height:100%;
+ overflow:hidden;
+}
+
+/* top */
+.top{
+ position:fixed;
+ top:0;
+ left:0;
+ width:100%;
+ height:56px;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ padding:12px 16px;
+ border-bottom:1px solid var(--border);
+ background:rgba(255,255,255,.85);
+ backdrop-filter: blur(12px);
+ z-index:50;
+}
+
+.brand{
+ display:flex;
+ align-items:center;
+ gap:10px;
+ font-weight:700;
+}
+
+.brand .logo{
+ width:32px;
+ height:32px;
+ border-radius:10px;
+ background:linear-gradient(135deg,var(--blue),#60a5fa);
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ color:white;
+ font-weight:900;
+}
+
+.menuBtn{
+ border:none;
+ background:transparent;
+ font-size:22px;
+ cursor:pointer;
+}
+
+/* sidebar */
+.sidebar{
+ position:fixed;
+ left:-300px;
+ top:0;
+ width:300px;
+ height:100%;
+ background:var(--card);
+ border-right:1px solid var(--border);
+ transition:.25s;
+ padding:14px;
+ z-index:100;
+ box-shadow: 10px 0 30px rgba(0,0,0,.08);
+ overflow:auto;
+}
+
+.sidebar.active{left:0}
+
+.sidebar h3{
+ margin:10px 0 12px;
+ font-size:13px;
+ color:var(--muted);
+ font-weight:700;
+ text-transform:uppercase;
+ letter-spacing:.5px;
+}
+
+.sidebar button{
+ width:100%;
+ padding:12px;
+ border:1px solid var(--border);
+ background:white;
+ color:var(--text);
+ text-align:left;
+ border-radius:12px;
+ cursor:pointer;
+ margin-bottom:8px;
+ font-weight:600;
+}
+.sidebar button:hover{
+ border-color:#cbd5e1;
+ background:#f8fafc;
+}
+
+.chatItem{
+ padding:10px;
+ border-radius:12px;
+ border:1px solid var(--border);
+ cursor:pointer;
+ margin-bottom:8px;
+ background:#fff;
+ font-weight:700;
+ font-size:14px;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ white-space:nowrap;
+}
+.chatItem:hover{background:#f8fafc}
+.chatItem.active{border-color:var(--blue)}
+
+/* main */
+.main{
+ position:fixed;
+ top:56px;
+ left:0;
+ width:100%;
+ height:calc(100dvh - 56px);
+ display:flex;
+ flex-direction:column;
+ overflow:hidden;
+}
+
+/* welcome/login */
+.welcome{
+ flex:1;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ padding:18px;
+}
+
+.welcomeCard{
+ width:100%;
+ max-width:520px;
+ background:var(--card);
+ border:1px solid var(--border);
+ border-radius:18px;
+ padding:20px;
+ box-shadow:var(--shadow);
+}
+
+.welcomeCard h1{
+ margin:0 0 8px;
+ font-size:22px;
+}
+
+.welcomeCard p{
+ margin:0 0 16px;
+ color:var(--muted);
+ line-height:1.4;
+ font-size:14px;
+}
+
+.welcomeButtons{
+ display:flex;
+ gap:10px;
+ flex-wrap:wrap;
+}
+
+.primaryBtn{
+ flex:1;
+ padding:12px;
+ border:none;
+ border-radius:12px;
+ background:var(--blue);
+ color:white;
+ font-weight:700;
+ cursor:pointer;
+}
+.primaryBtn:hover{background:var(--blue2)}
+
+.secondaryBtn{
+ flex:1;
+ padding:12px;
+ border:1px solid var(--border);
+ border-radius:12px;
+ background:white;
+ color:var(--text);
+ font-weight:700;
+ cursor:pointer;
+}
+.secondaryBtn:hover{background:#f8fafc}
+
+/* messages */
+.messages{
+ flex:1;
+ overflow:auto;
+ padding:16px;
+ display:none;
+ padding-bottom:130px;
+}
+
+.msgRow{
+ display:flex;
+ margin:12px 0;
+}
+
+.msgRow.user{justify-content:flex-end}
+.msgRow.ai{justify-content:flex-start}
+
+.msg{
+ max-width:85%;
+ padding:12px 14px;
+ border-radius:16px;
+ border:1px solid var(--border);
+ background:white;
+ box-shadow: 0 4px 15px rgba(2,6,23,.06);
+ white-space:pre-wrap;
+ word-wrap:break-word;
+ font-size:15px;
+ line-height:1.4;
+}
+
+.msgRow.user .msg{
+ background:linear-gradient(135deg,var(--blue),#60a5fa);
+ color:white;
+ border:none;
+}
+
+.msg img{
+ max-width:100%;
+ border-radius:14px;
+ margin-top:10px;
+ border:1px solid var(--border);
+}
+
+.msgHeader{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin-bottom:6px;
+ gap:10px;
+}
+
+.copyAllBtn{
+ padding:6px 10px;
+ border-radius:10px;
+ border:1px solid var(--border);
+ background:#fff;
+ cursor:pointer;
+ font-weight:700;
+ font-size:12px;
+}
+.copyAllBtn:hover{background:#f8fafc}
+
+/* code blocks */
+pre{
+ background:#0b1220;
+ color:#e2e8f0;
+ padding:12px;
+ border-radius:14px;
+ overflow:auto;
+ border:1px solid rgba(255,255,255,.12);
+ margin-top:10px;
+}
+
+.codeHeader{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ font-size:12px;
+ color:#94a3b8;
+ margin-bottom:8px;
+}
+
+.copyCodeBtn{
+ padding:6px 10px;
+ border-radius:10px;
+ border:none;
+ background:rgba(255,255,255,.08);
+ color:#fff;
+ cursor:pointer;
+ font-weight:800;
+}
+.copyCodeBtn:hover{background:rgba(255,255,255,.15)}
 
 /* input */
-.input{display:flex;padding:10px;gap:5px}
-.input input{flex:1;padding:10px;background:#0f172a;border:none;color:white;border-radius:10px}
-.btn{width:45px;height:45px;background:#1e293b;border:none;border-radius:10px;color:white}
-
-/* login */
-.login{
- position:fixed;inset:0;background:black;
- display:flex;align-items:center;justify-content:center
+.input{
+ position:fixed;
+ bottom:0;
+ left:0;
+ width:100%;
+ display:flex;
+ gap:10px;
+ padding:12px;
+ border-top:1px solid var(--border);
+ align-items:center;
+ background:rgba(255,255,255,.85);
+ backdrop-filter: blur(12px);
+ z-index:60;
 }
-.box{background:#020617;padding:20px;border-radius:10px}
+
+.textBox{
+ flex:1;
+ display:flex;
+ align-items:center;
+ background:white;
+ border:1px solid var(--border);
+ border-radius:999px;
+ padding:10px 12px;
+ gap:10px;
+ box-shadow: 0 4px 15px rgba(2,6,23,.06);
+}
+
+.textBox input{
+ flex:1;
+ border:none;
+ outline:none;
+ font-size:15px;
+ background:transparent;
+ color:var(--text);
+}
+
+.btnCircle{
+ width:42px;
+ height:42px;
+ border-radius:50%;
+ border:none;
+ background:var(--blue);
+ color:white;
+ cursor:pointer;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:16px;
+ box-shadow: 0 6px 18px rgba(37,99,235,.25);
+}
+.btnCircle:hover{background:var(--blue2)}
+
+.btnGray{
+ width:42px;
+ height:42px;
+ border-radius:50%;
+ border:1px solid var(--border);
+ background:white;
+ color:var(--text);
+ cursor:pointer;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:16px;
+}
+.btnGray:hover{background:#f8fafc}
+
+/* menu plus */
+.menuPlus{
+ position:fixed;
+ bottom:80px;
+ left:14px;
+ background:white;
+ border-radius:14px;
+ border:1px solid var(--border);
+ display:none;
+ flex-direction:column;
+ overflow:hidden;
+ z-index:999;
+ box-shadow:var(--shadow);
+ width:200px;
+}
+
+.menuPlus button{
+ padding:12px;
+ border:none;
+ background:white;
+ text-align:left;
+ cursor:pointer;
+ font-weight:700;
+ color:var(--text);
+}
+.menuPlus button:hover{
+ background:#f1f5f9;
+}
+
+/* loading dots */
+.loadingDots span{
+ animation: blink 1.2s infinite both;
+ font-weight:900;
+ font-size:18px;
+}
+.loadingDots span:nth-child(2){animation-delay:.2s}
+.loadingDots span:nth-child(3){animation-delay:.4s}
+
+@keyframes blink{
+ 0%{opacity:.2}
+ 20%{opacity:1}
+ 100%{opacity:.2}
+}
 </style>
 </head>
 
 <body>
 
-<div class="login" id="login">
-  <div class="box">
-    <h2>Login</h2>
-    <input id="user"><br><br>
-    <button onclick="login()">Entrar</button>
+<div class="sidebar" id="sidebar">
+  <h3>Menu</h3>
+  <button onclick="newChat()">➕ Novo chat</button>
+
+  <div id="chatListArea" style="display:none;">
+    <h3>Seus Chats</h3>
+    <div id="chatList"></div>
   </div>
 </div>
 
-<div class="top">ZR GPT</div>
+<div class="top">
+  <button class="menuBtn" onclick="toggleSidebar()">☰</button>
 
-<div class="chat">
+  <div class="brand">
+    <div class="logo">ZR</div>
+    <div>ZR GPT</div>
+  </div>
+
+  <div style="width:32px;"></div>
+</div>
+
+<div class="main">
+
+  <div class="welcome" id="welcome">
+    <div class="welcomeCard">
+      <h1>Bem-vindo ao ZR GPT 👋</h1>
+      <p>
+        Para sua segurança, recomendamos fazer login antes de usar.
+        Sem login você poderá conversar normalmente, porém <b>não poderá enviar imagens</b>.
+      </p>
+
+      <div class="welcomeButtons">
+        <button class="secondaryBtn" onclick="continueNoLogin()">
+          Continuar sem login
+        </button>
+
+        <button class="primaryBtn" onclick="goLogin()">
+          Fazer login
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="messages" id="messages"></div>
 
-  <div class="input">
-    <button class="btn" onclick="file.click()">+</button>
-    <input type="file" id="file" hidden onchange="upload(event)">
+</div>
 
-    <button class="btn" onclick="audio()">🎤</button>
+<div class="input" id="chatInput" style="display:none;">
 
-    <input id="text">
+  <button class="btnGray" onclick="togglePlus()">➕</button>
 
-    <button class="btn" onclick="send()">↑</button>
+  <div class="menuPlus" id="menuPlus">
+    <button onclick="sendImageClick()">🖼️ Enviar imagem</button>
+    <button onclick="document.getElementById('file').click()">📎 Enviar arquivo</button>
   </div>
+
+  <input type="file" id="file" hidden onchange="fileSend(event)">
+  <input type="file" id="img" hidden accept="image/*" onchange="imageSend(event)">
+
+  <button class="btnGray" onclick="audio()">🎤</button>
+
+  <div class="textBox">
+    <input id="text" placeholder="Pergunte qualquer coisa...">
+  </div>
+
+  <button class="btnCircle" onclick="send()">⬆️</button>
+
 </div>
 
 <script>
-let messages=[];
+let chatMessages = [];
+let loggedIn = false;
+let currentChatId = null;
 
-/* login */
-async function login(){
- let user=document.getElementById("user").value;
+const API_URL = "https://backend01-cnva.onrender.com";
 
- let res=await fetch("http://SEU-IP:3000/login",{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({username:user})
- });
+const sidebar = document.getElementById("sidebar");
+const messagesDiv = document.getElementById("messages");
+const input = document.getElementById("text");
+const welcome = document.getElementById("welcome");
+const chatInput = document.getElementById("chatInput");
 
- let data=await res.json();
- localStorage.setItem("token",data.token);
- loginDiv.style.display="none";
+const chatListArea = document.getElementById("chatListArea");
+const chatListDiv = document.getElementById("chatList");
+
+/* ===== Helpers ===== */
+function getToken(){
+  return localStorage.getItem("token");
 }
 
-/* render */
+function formatMessageText(text){
+  if(!text) return "";
+
+  // escape básico
+  text = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  // blocos de código ``` ```
+  text = text.replace(/```([\s\S]*?)```/g, (match, code) => {
+    let safe = code.replace(/&lt;/g,"<").replace(/&gt;/g,">");
+    return `
+      <pre>
+        <div class="codeHeader">
+          <span>📌 Código</span>
+          <button class="copyCodeBtn" onclick="copyText(\`${safe.replace(/`/g,"\\`")}\`)">📋 Copiar</button>
+        </div>
+<code>${safe}</code>
+      </pre>
+    `;
+  });
+
+  // quebra de linha
+  text = text.replace(/\n/g, "<br>");
+
+  return text;
+}
+
+function copyText(txt){
+  navigator.clipboard.writeText(txt);
+  alert("✅ Copiado!");
+}
+
+/* Sidebar */
+function toggleSidebar(){
+ sidebar.classList.toggle("active");
+}
+
+/* Login */
+function continueNoLogin(){
+ loggedIn = false;
+ welcome.style.display = "none";
+ messagesDiv.style.display = "block";
+ chatInput.style.display = "flex";
+ chatListArea.style.display = "none";
+ render();
+}
+
+function goLogin(){
+ window.location.href = "/login";
+}
+
+/* + menu */
+function togglePlus(){
+ let m = document.getElementById("menuPlus");
+ m.style.display = (m.style.display === "flex") ? "none" : "flex";
+}
+
+/* Render */
 function render(){
- messagesDiv.innerHTML="";
- messages.forEach(m=>{
-  let d=document.createElement("div");
-  d.className="msg "+m.role;
-  d.innerText=m.content;
-  messagesDiv.appendChild(d);
- });
-}
+ messagesDiv.innerHTML = "";
 
-/* send */
-async function send(){
- let input=document.getElementById("text");
- if(!input.value)return;
+ chatMessages.forEach((m, index)=>{
+  let row = document.createElement("div");
+  row.className = "msgRow " + m.role;
 
- messages.push({role:"user",content:input.value});
- input.value="";
- messages.push({role:"ai",content:"..."});
- render();
+  let bubble = document.createElement("div");
+  bubble.className = "msg";
 
- let res=await fetch("http://SEU-IP:3000/chat",{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({
-   token:localStorage.getItem("token"),
-   messages:messages.map(m=>({
-    role:m.role==="ai"?"assistant":"user",
-    content:m.content
-   }))
-  })
+  if(m.role === "ai"){
+    bubble.innerHTML = `
+      <div class="msgHeader">
+        <b>ZR GPT</b>
+        <button class="copyAllBtn" onclick="copyText(${JSON.stringify(m.rawText || "")})">📋 Copiar</button>
+      </div>
+      ${m.content}
+    `;
+  } else {
+    bubble.innerHTML = m.content;
+  }
+
+  row.appendChild(bubble);
+  messagesDiv.appendChild(row);
  });
 
- let data=await res.json();
- messages[messages.length-1].content=data.choices[0].message.content;
+ messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+/* Arquivo */
+function fileSend(e){
+ let file = e.target.files[0];
+ if(!file) return;
+
+ chatMessages.push({
+  role:"user",
+  content:"📎 Arquivo enviado: <b>" + file.name + "</b>"
+ });
+
  render();
 }
 
-/* upload */
-function upload(e){
- let f=e.target.files[0];
- messages.push({role:"user",content:"📎 "+f.name});
- render();
+/* Enviar imagem click */
+function sendImageClick(){
+ if(!loggedIn){
+  alert("⚠️ Para enviar imagens você precisa fazer login.");
+  return;
+ }
+ document.getElementById("img").click();
 }
 
-/* audio */
-function audio(){
- let r=new (webkitSpeechRecognition||SpeechRecognition)();
- r.lang="pt-BR";
- r.onresult=e=>{
-  text.value=e.results[0][0].transcript;
+/* Enviar imagem */
+async function imageSend(e){
+ let file = e.target.files[0];
+ if(!file) return;
+
+ let reader = new FileReader();
+ reader.onload = async () => {
+  let base64 = reader.result;
+
+  chatMessages.push({
+   role:"user",
+   content:`🖼️ <br><img src="${base64}">`
+  });
+
+  chatMessages.push({
+   role:"ai",
+   content:`<span class="loadingDots"><span>.</span><span>.</span><span>.</span></span>`,
+   rawText:""
+  });
+
+  render();
+
+  let aiIndex = chatMessages.length - 1;
+
+  try{
+   let r = await fetch(API_URL + "/image",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      ...(getToken() ? { "Authorization": "Bearer " + getToken() } : {})
+    },
+    body:JSON.stringify({ image: base64 })
+   });
+
+   let d = await r.json();
+   let txt = d.reply || d.error || "Erro ao analisar imagem.";
+
+   chatMessages[aiIndex].rawText = txt;
+   chatMessages[aiIndex].content = formatMessageText(txt);
+
+   render();
+
+  }catch(err){
+   chatMessages[aiIndex].rawText = err.message;
+   chatMessages[aiIndex].content = "❌ Erro ao enviar imagem.";
+   render();
+  }
  };
+
+ reader.readAsDataURL(file);
+}
+
+/* Voz */
+function audio(){
+ let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+ if(!SpeechRecognition){
+  alert("Seu navegador não suporta reconhecimento de voz.");
+  return;
+ }
+
+ let r = new SpeechRecognition();
+ r.lang = "pt-BR";
+ r.onresult = e => input.value = e.results[0][0].transcript;
  r.start();
 }
 
-/* init */
-window.onload=()=>{
- window.messagesDiv=document.getElementById("messages");
- window.loginDiv=document.getElementById("login");
+/* ===== Chats API ===== */
+async function loadChats(){
+ try{
+  let r = await fetch(API_URL + "/api/chats",{
+    headers:{ "Authorization":"Bearer " + getToken() }
+  });
+
+  let d = await r.json();
+  if(!r.ok) return;
+
+  chatListDiv.innerHTML = "";
+
+  d.chats.forEach(chat=>{
+    let div = document.createElement("div");
+    div.className = "chatItem" + (chat.id === currentChatId ? " active" : "");
+    div.textContent = chat.title;
+    div.onclick = ()=>openChat(chat.id);
+    chatListDiv.appendChild(div);
+  });
+
+ }catch{}
+}
+
+async function createChat(title){
+ let r = await fetch(API_URL + "/api/chats",{
+   method:"POST",
+   headers:{
+     "Content-Type":"application/json",
+     "Authorization":"Bearer " + getToken()
+   },
+   body:JSON.stringify({ title })
+ });
+
+ let d = await r.json();
+ if(!r.ok) return null;
+
+ return d.chat;
+}
+
+async function openChat(id){
+ currentChatId = id;
+
+ let r = await fetch(API_URL + "/api/chats/" + id,{
+  headers:{ "Authorization":"Bearer " + getToken() }
+ });
+
+ let d = await r.json();
+ if(!r.ok){
+  alert(d.error);
+  return;
+ }
+
+ chatMessages = d.chat.messages.map(m=>{
+  if(m.role === "assistant"){
+    return {
+      role:"ai",
+      rawText:m.content,
+      content: formatMessageText(m.content)
+    };
+  }
+  return { role:"user", content:m.content };
+ });
+
+ render();
+ loadChats();
+}
+
+async function saveMessage(role, content){
+ if(!loggedIn || !currentChatId) return;
+
+ await fetch(API_URL + "/api/chats/" + currentChatId + "/messages",{
+  method:"POST",
+  headers:{
+    "Content-Type":"application/json",
+    "Authorization":"Bearer " + getToken()
+  },
+  body:JSON.stringify({ role, content })
+ });
+}
+
+/* Novo chat */
+async function newChat(){
+ chatMessages = [];
+ currentChatId = null;
+ render();
+
+ if(loggedIn){
+  let chat = await createChat("Novo chat");
+  if(chat){
+    currentChatId = chat.id;
+    await loadChats();
+  }
+ }
+}
+
+/* STREAM CHAT */
+async function send(){
+ if(!input.value.trim()) return;
+
+ let userText = input.value.trim();
+ input.value = "";
+
+ welcome.style.display = "none";
+ messagesDiv.style.display = "block";
+ chatInput.style.display = "flex";
+
+ // cria chat se não tiver
+ if(loggedIn && !currentChatId){
+   let chat = await createChat(userText.slice(0, 40));
+   if(chat){
+     currentChatId = chat.id;
+     loadChats();
+   }
+ }
+
+ chatMessages.push({
+  role:"user",
+  content:userText
+ });
+
+ render();
+
+ await saveMessage("user", userText);
+
+ // ai msg
+ chatMessages.push({
+  role:"ai",
+  content:"",
+  rawText:""
+ });
+
+ render();
+
+ let aiIndex = chatMessages.length - 1;
+
+ try{
+  let r = await fetch(API_URL + "/chat-stream",{
+   method:"POST",
+   headers:{
+     "Content-Type":"application/json"
+   },
+   body:JSON.stringify({
+     messages:[
+       { role:"user", content:userText }
+     ]
+   })
+  });
+
+  if(!r.ok){
+    let errData = await r.json();
+    chatMessages[aiIndex].rawText = errData.error || "Erro backend";
+    chatMessages[aiIndex].content = "❌ " + (errData.error || "Erro backend");
+    render();
+    return;
+  }
+
+  const reader = r.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+
+  let fullText = "";
+
+  while(true){
+    const { value, done } = await reader.read();
+    if(done) break;
+
+    const chunk = decoder.decode(value, { stream:true });
+
+    // SSE vem tipo: data: {"token":"oi"}\n\n
+    const parts = chunk.split("\n\n");
+
+    for(const part of parts){
+      if(!part.startsWith("data:")) continue;
+
+      const dataStr = part.replace("data:", "").trim();
+
+      if(dataStr === "[DONE]"){
+        chatMessages[aiIndex].rawText = fullText;
+        chatMessages[aiIndex].content = formatMessageText(fullText);
+        render();
+
+        await saveMessage("assistant", fullText);
+        loadChats();
+        return;
+      }
+
+      try{
+        const json = JSON.parse(dataStr);
+        if(json.token){
+          fullText += json.token;
+          chatMessages[aiIndex].rawText = fullText;
+          chatMessages[aiIndex].content = formatMessageText(fullText);
+          render();
+        }
+      }catch{}
+    }
+  }
+
+ }catch(err){
+  chatMessages[aiIndex].rawText = err.message;
+  chatMessages[aiIndex].content = "❌ Falha de conexão: " + err.message;
+  render();
+ }
+}
+
+/* Auto login detect */
+window.onload = async ()=>{
+ const token = getToken();
+
+ if(token){
+   loggedIn = true;
+   welcome.style.display = "none";
+   messagesDiv.style.display = "block";
+   chatInput.style.display = "flex";
+   chatListArea.style.display = "block";
+
+   await loadChats();
+   await newChat();
+ } else {
+   loggedIn = false;
+ }
 };
+
+/* ENTER enviar */
+input.addEventListener("keydown", (e)=>{
+ if(e.key === "Enter"){
+  send();
+ }
+});
 </script>
 
 </body>
-</html>
+  </html>
