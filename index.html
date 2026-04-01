@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeoAssist - IA Jarvis</title>
+
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+  body{background:#0b1220;color:#fff;height:100vh;overflow:hidden}
+
+  .app{display:flex;height:100vh;width:100vw}
+
+  /* Sidebar */
+  .sidebar{
+    width:300px;
+    background:#0f172a;
+    border-right:1px solid rgba(255,255,255,.08);
+    padding:15px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    transition:.25s;
+  }
+
+  .sidebar.hidden{
+    transform:translateX(-100%);
+    position:absolute;
+    left:0;
+    top:0;
+    height:100vh;
+    z-index:10;
+  }
+
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:20px;
+    font-weight:800;
+    padding:10px;
+    border-radius:12px;
+    background:rgba(255,255,255,.03);
+  }
+
+  .logo span{color:#22c55e}
+
+  .sectionTitle{
+    font-size:12px;
+    opacity:.7;
+    margin-top:8px;
+  }
+
+  .category{
+    padding:12px;
+    border-radius:12px;
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.03);
+    transition:.2s;
+    font-weight:600;
+  }
+
+  .category:hover{background:rgba(255,255,255,.06)}
+  .category.active{
+    border:1px solid #22c55e;
+    background:rgba(34,197,94,.15);
+  }
+
+  .mini{
+    font-size:12px;
+    opacity:.7;
+    margin-top:5px;
+  }
+
+  /* Main */
+  .main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+  }
+
+  .topbar{
+    height:60px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 18px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.02);
+  }
+
+  .menuBtn{
+    background:transparent;
+    border:none;
+    color:white;
+    font-size:22px;
+    cursor:pointer;
+  }
+
+  .topbar h2{
+    font-size:15px;
+    font-weight:800;
+  }
+
+  .topbar .status{
+    font-size:12px;
+    opacity:.7;
+  }
+
+  .chat{
+    flex:1;
+    padding:18px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .msg{
+    max-width:900px;
+    padding:12px 14px;
+    border-radius:14px;
+    line-height:1.4;
+    font-size:14px;
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+
+  .user{
+    background:rgba(34,197,94,.2);
+    border:1px solid rgba(34,197,94,.4);
+    align-self:flex-end;
+  }
+
+  .bot{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    align-self:flex-start;
+  }
+
+  .typing{
+    opacity:.7;
+    font-style:italic;
+  }
+
+  .inputArea{
+    padding:14px;
+    border-top:1px solid rgba(255,255,255,.08);
+    display:flex;
+    gap:10px;
+    background:#0f172a;
+  }
+
+  textarea{
+    flex:1;
+    resize:none;
+    height:55px;
+    padding:12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.12);
+    background:#0b1220;
+    color:white;
+    outline:none;
+    font-size:14px;
+  }
+
+  .sendBtn{
+    width:120px;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+    font-weight:800;
+    background:#22c55e;
+    color:#0b1220;
+    transition:.2s;
+  }
+
+  .sendBtn:hover{opacity:.85}
+
+  @media(max-width:900px){
+    .sidebar{
+      position:absolute;
+      left:0;
+      top:0;
+      height:100vh;
+      z-index:10;
+    }
+  }
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- Sidebar -->
+  <div class="sidebar hidden" id="sidebar">
+    <div class="logo">🤖 <div>Neo<span>Assist</span></div></div>
+
+    <div class="sectionTitle">CHATS</div>
+
+    <div class="category active" onclick="openChat('normal')" id="cat-normal">💬 Chat Normal</div>
+
+    <div class="sectionTitle">ESTUDANTES</div>
+    <div class="category" onclick="openChat('exercicios')" id="cat-exercicios">📝 Exercícios</div>
+    <div class="category" onclick="openChat('materias')" id="cat-materias">📚 Matérias</div>
+    <div class="category" onclick="openChat('trabalhos')" id="cat-trabalhos">📄 Trabalhos</div>
+    <div class="category" onclick="openChat('redacao')" id="cat-redacao">✍️ Redação ENEM</div>
+    <div class="category" onclick="openChat('cronograma')" id="cat-cronograma">📅 Cronograma</div>
+
+    <div class="sectionTitle">AÇÕES RÁPIDAS</div>
+    <div class="mini">Cole um texto e use comandos tipo:</div>
+    <div class="mini">• "resuma isso"</div>
+    <div class="mini">• "crie 10 questões"</div>
+    <div class="mini">• "explique passo a passo"</div>
+
+    <div class="mini" style="margin-top:auto;">⚡ NeoAssist v1.0</div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <button class="menuBtn" onclick="toggleSidebar()">☰</button>
+      <h2 id="chatTitle">Chat Normal</h2>
+      <div class="status" id="status">Online</div>
+    </div>
+
+    <div class="chat" id="chat"></div>
+
+    <div class="inputArea">
+      <textarea id="input" placeholder="Digite sua mensagem..."></textarea>
+      <button class="sendBtn" onclick="send()">Enviar</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API_URL = "https://api-neoassist.onrender.com/api/chat";
+  let currentChat = "normal";
+
+  const sidebar = document.getElementById("sidebar");
+  const chatTitle = document.getElementById("chatTitle");
+  const chat = document.getElementById("chat");
+  const input = document.getElementById("input");
+
+  function toggleSidebar(){
+    sidebar.classList.toggle("hidden");
+  }
+
+  function loadChats(){
+    let saved = localStorage.getItem("neoassist_chats");
+    if(!saved){
+      localStorage.setItem("neoassist_chats", JSON.stringify({
+        normal: [],
+        exercicios: [],
+        materias: [],
+        trabalhos: [],
+        redacao: [],
+        cronograma: []
+      }));
+    }
+  }
+
+  function getAllChats(){
+    return JSON.parse(localStorage.getItem("neoassist_chats"));
+  }
+
+  function saveAllChats(data){
+    localStorage.setItem("neoassist_chats", JSON.stringify(data));
+  }
+
+  function addMessage(text, type){
+    const div = document.createElement("div");
+    div.className = "msg " + type;
+    div.textContent = text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function renderChat(){
+    chat.innerHTML = "";
+    const chats = getAllChats();
+    const history = chats[currentChat] || [];
+
+    if(history.length === 0){
+      addMessage("Olá! Eu sou o NeoAssist. Me diga o que você precisa.", "bot");
+    } else {
+      history.forEach(m => addMessage(m.content, m.role === "user" ? "user" : "bot"));
+    }
+  }
+
+  function openChat(name){
+    currentChat = name;
+
+    document.querySelectorAll(".category").forEach(c => c.classList.remove("active"));
+    document.getElementById("cat-" + name).classList.add("active");
+
+    const titles = {
+      normal: "Chat Normal",
+      exercicios: "Exercícios",
+      materias: "Matérias",
+      trabalhos: "Trabalhos",
+      redacao: "Redação ENEM",
+      cronograma: "Cronograma"
+    };
+
+    chatTitle.textContent = titles[name] || "Chat";
+    renderChat();
+
+    if(window.innerWidth < 900){
+      sidebar.classList.add("hidden");
+    }
+  }
+
+  function getMode(){
+    const modes = {
+      normal: "Normal",
+      exercicios: "Estudante - Exercícios",
+      materias: "Estudante - Matérias",
+      trabalhos: "Estudante - Trabalhos",
+      redacao: "Estudante - Redação",
+      cronograma: "Estudante - Cronograma"
+    };
+    return modes[currentChat] || "Normal";
+  }
+
+  async function send(){
+    const text = input.value.trim();
+    if(!text) return;
+
+    const chats = getAllChats();
+    chats[currentChat].push({ role: "user", content: text });
+    saveAllChats(chats);
+
+    renderChat();
+    input.value = "";
+
+    const typingDiv = document.createElement("div");
+    typingDiv.className = "msg bot typing";
+    typingDiv.textContent = "NeoAssist está pensando...";
+    chat.appendChild(typingDiv);
+    chat.scrollTop = chat.scrollHeight;
+
+    try{
+      const history = chats[currentChat];
+
+      const res = await fetch(API_URL, {
+        method:"POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          message: text,
+          mode: getMode(),
+          history: history
+        })
+      });
+
+      const data = await res.json();
+      typingDiv.remove();
+
+      if(data.error){
+        addMessage("Erro: " + data.error, "bot");
+        return;
+      }
+
+      chats[currentChat].push({ role: "assistant", content: data.reply });
+      saveAllChats(chats);
+
+      renderChat();
+
+    }catch(err){
+      typingDiv.remove();
+      addMessage("Erro ao conectar no backend. Ligue o servidor.", "bot");
+    }
+  }
+
+  loadChats();
+  openChat("normal");
+</script>
+
+</body>
+</html>
