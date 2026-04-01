@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>NeoAssist - Admin Panel</title>
+<title>NeoAdmin - Painel</title>
 
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
@@ -12,11 +12,15 @@
     --bg:#0b1220;
     --panel:#0f172a;
     --card:rgba(255,255,255,.04);
+    --card2:rgba(255,255,255,.06);
     --border:rgba(255,255,255,.08);
+
     --green:#22c55e;
     --red:#ef4444;
     --yellow:#facc15;
-    --text:#fff;
+    --blue:#3b82f6;
+
+    --text:#ffffff;
     --muted:rgba(255,255,255,.7);
   }
 
@@ -30,71 +34,100 @@
     display:flex;
     width:100%;
     height:100dvh;
-    overflow:hidden;
   }
 
   /* Sidebar */
   .sidebar{
-    width:300px;
+    width:280px;
     background:var(--panel);
     border-right:1px solid var(--border);
-    padding:15px;
+    padding:18px;
     display:flex;
     flex-direction:column;
-    gap:12px;
-    transition:.25s;
-    z-index:10;
+    gap:14px;
   }
 
-  .sidebar.hidden{
-    transform:translateX(-100%);
-    position:absolute;
-    left:0;
-    top:0;
-    height:100dvh;
-  }
-
-  .logo{
+  .brand{
     display:flex;
     align-items:center;
     gap:10px;
-    font-size:20px;
-    font-weight:800;
-    padding:10px;
-    border-radius:12px;
+    padding:12px;
+    border-radius:16px;
     background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.06);
   }
 
-  .logo span{color:var(--green)}
+  .brandIcon{
+    width:42px;
+    height:42px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(34,197,94,.18);
+    border:1px solid rgba(34,197,94,.4);
+    font-size:20px;
+  }
 
-  .sectionTitle{
+  .brandText{
+    display:flex;
+    flex-direction:column;
+    line-height:1.1;
+  }
+
+  .brandText b{
+    font-size:15px;
+  }
+
+  .brandText span{
     font-size:12px;
     opacity:.7;
-    margin-top:8px;
+  }
+
+  .menuTitle{
+    font-size:12px;
+    opacity:.6;
+    margin-top:6px;
   }
 
   .menuItem{
-    padding:12px;
-    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 12px;
+    border-radius:14px;
     cursor:pointer;
-    border:1px solid var(--border);
-    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.06);
+    background:rgba(255,255,255,.02);
+    font-weight:800;
     transition:.2s;
-    font-weight:700;
-    user-select:none;
   }
 
-  .menuItem:hover{background:rgba(255,255,255,.06)}
+  .menuItem:hover{
+    background:rgba(255,255,255,.06);
+  }
+
   .menuItem.active{
-    border:1px solid var(--green);
-    background:rgba(34,197,94,.15);
+    border:1px solid rgba(34,197,94,.55);
+    background:rgba(34,197,94,.14);
+    color:var(--green);
   }
 
-  .mini{
+  .menuItem small{
     font-size:12px;
     opacity:.7;
-    margin-top:5px;
-    line-height:1.3;
+    font-weight:700;
+  }
+
+  .sidebarFooter{
+    margin-top:auto;
+    opacity:.7;
+    font-size:12px;
+    line-height:1.4;
+    padding:12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.06);
+    background:rgba(255,255,255,.02);
   }
 
   /* Main */
@@ -107,7 +140,7 @@
   }
 
   .topbar{
-    height:60px;
+    height:70px;
     flex-shrink:0;
     display:flex;
     align-items:center;
@@ -115,149 +148,235 @@
     padding:0 18px;
     border-bottom:1px solid var(--border);
     background:rgba(255,255,255,.02);
+    gap:12px;
   }
 
-  .menuBtn{
-    background:transparent;
-    border:none;
-    color:white;
-    font-size:24px;
-    cursor:pointer;
+  .topLeft{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
   }
 
-  .topbar h2{
-    font-size:15px;
+  .topLeft h1{
+    font-size:16px;
+    font-weight:900;
+  }
+
+  .topLeft span{
+    font-size:12px;
+    opacity:.7;
+  }
+
+  .topRight{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .status{
+    font-size:12px;
+    opacity:.8;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.03);
     font-weight:800;
   }
 
-  .topbar .status{
-    font-size:12px;
-    opacity:.7;
-    display:flex;
-    gap:10px;
-    align-items:center;
-  }
-
   .logoutBtn{
-    background:transparent;
-    border:1px solid rgba(255,255,255,.15);
-    color:white;
-    padding:6px 10px;
-    border-radius:10px;
+    border:none;
+    background:rgba(239,68,68,.18);
+    border:1px solid rgba(239,68,68,.35);
+    color:var(--red);
+    padding:8px 12px;
+    border-radius:12px;
     cursor:pointer;
+    font-weight:900;
     font-size:12px;
-    font-weight:700;
   }
 
-  .logoutBtn:hover{
-    background:rgba(255,255,255,.06);
-  }
+  .logoutBtn:hover{opacity:.85}
 
   /* Content */
   .content{
     flex:1;
     overflow-y:auto;
+    padding:18px;
+  }
+
+  .gridStats{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:12px;
+    margin-bottom:16px;
+  }
+
+  .stat{
     padding:16px;
+    border-radius:18px;
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.07);
+    display:flex;
+    flex-direction:column;
+    gap:6px;
   }
 
-  .card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:16px;
-    margin-bottom:14px;
+  .stat span{
+    font-size:12px;
+    opacity:.7;
+    font-weight:800;
   }
 
-  .card h3{
-    font-size:14px;
-    margin-bottom:10px;
+  .stat b{
+    font-size:22px;
+    font-weight:900;
   }
 
-  .input{
-    width:100%;
+  .stat.green{border-color:rgba(34,197,94,.25)}
+  .stat.red{border-color:rgba(239,68,68,.25)}
+  .stat.blue{border-color:rgba(59,130,246,.25)}
+  .stat.yellow{border-color:rgba(250,204,21,.25)}
+
+  .toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
+  }
+
+  .searchBox{
+    flex:1;
+    min-width:220px;
+    display:flex;
+    gap:10px;
+    align-items:center;
     padding:12px;
-    border-radius:14px;
-    border:1px solid rgba(255,255,255,.12);
-    background:var(--bg);
-    color:white;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.03);
+  }
+
+  .searchBox input{
+    flex:1;
+    background:transparent;
+    border:none;
     outline:none;
-    margin-bottom:10px;
+    color:white;
     font-size:14px;
   }
 
   .btn{
-    width:100%;
-    padding:12px;
     border:none;
-    border-radius:14px;
-    font-weight:900;
+    padding:12px 14px;
+    border-radius:16px;
     cursor:pointer;
-    font-size:14px;
+    font-weight:900;
+    font-size:13px;
     transition:.2s;
   }
 
-  .btn.green{background:var(--green);color:#0b1220}
-  .btn.red{background:var(--red);color:white}
-  .btn.yellow{background:var(--yellow);color:#0b1220}
-
   .btn:hover{opacity:.9}
 
-  .userRow{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    padding:14px;
-    border-radius:16px;
-    border:1px solid rgba(255,255,255,.1);
-    background:rgba(255,255,255,.02);
-    margin-bottom:10px;
-  }
+  .btn.green{background:var(--green);color:#0b1220}
+  .btn.blue{background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.35);color:#93c5fd}
+  .btn.yellow{background:rgba(250,204,21,.18);border:1px solid rgba(250,204,21,.3);color:#fde68a}
+  .btn.red{background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
 
-  .userTop{
+  .filterRow{
     display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
+    gap:8px;
     flex-wrap:wrap;
   }
+
+  .table{
+    width:100%;
+    border-radius:18px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.02);
+  }
+
+  .tableHead{
+    display:grid;
+    grid-template-columns: 1.2fr 1fr .8fr 1.5fr;
+    padding:14px;
+    font-size:12px;
+    opacity:.75;
+    font-weight:900;
+    background:rgba(255,255,255,.03);
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+
+  .row{
+    display:grid;
+    grid-template-columns: 1.2fr 1fr .8fr 1.5fr;
+    padding:14px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    align-items:center;
+    gap:10px;
+  }
+
+  .row:last-child{border-bottom:none}
 
   .userName{
     font-weight:900;
     font-size:14px;
   }
 
-  .badge{
+  .userId{
     font-size:12px;
-    padding:5px 10px;
-    border-radius:20px;
-    border:1px solid rgba(255,255,255,.2);
-    opacity:.85;
+    opacity:.6;
+    margin-top:4px;
   }
 
-  .badge.active{border-color:rgba(34,197,94,.6); color:var(--green)}
-  .badge.suspended{border-color:rgba(239,68,68,.6); color:var(--red)}
+  .badge{
+    font-size:12px;
+    font-weight:900;
+    padding:7px 12px;
+    border-radius:999px;
+    width:max-content;
+    border:1px solid rgba(255,255,255,.12);
+  }
+
+  .badge.active{
+    border-color:rgba(34,197,94,.4);
+    color:var(--green);
+    background:rgba(34,197,94,.12);
+  }
+
+  .badge.suspended{
+    border-color:rgba(239,68,68,.4);
+    color:var(--red);
+    background:rgba(239,68,68,.12);
+  }
 
   .actions{
     display:flex;
     gap:8px;
     flex-wrap:wrap;
+    justify-content:flex-end;
   }
 
   .smallBtn{
-    padding:8px 10px;
     border:none;
-    border-radius:12px;
-    font-weight:900;
     cursor:pointer;
+    font-weight:900;
     font-size:12px;
+    padding:8px 10px;
+    border-radius:14px;
+    transition:.2s;
   }
 
-  .smallBtn.green{background:rgba(34,197,94,.2);border:1px solid rgba(34,197,94,.4);color:var(--green)}
-  .smallBtn.red{background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);color:var(--red)}
-  .smallBtn.yellow{background:rgba(250,204,21,.2);border:1px solid rgba(250,204,21,.4);color:var(--yellow)}
   .smallBtn:hover{opacity:.85}
 
-  /* Modal Login */
+  .smallBtn.blue{background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.35);color:#93c5fd}
+  .smallBtn.yellow{background:rgba(250,204,21,.18);border:1px solid rgba(250,204,21,.3);color:#fde68a}
+  .smallBtn.green{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#86efac}
+  .smallBtn.red{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+
+  /* Modal */
   .modalBg{
     position:fixed;
     top:0;
@@ -265,7 +384,7 @@
     width:100%;
     height:100dvh;
     background:rgba(0,0,0,.65);
-    display:flex;
+    display:none;
     align-items:center;
     justify-content:center;
     z-index:9999;
@@ -274,40 +393,105 @@
 
   .modal{
     width:100%;
-    max-width:380px;
+    max-width:420px;
     background:var(--panel);
-    border:1px solid var(--border);
-    border-radius:18px;
-    padding:20px;
-    box-shadow:0 0 30px rgba(0,0,0,.6);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:20px;
+    padding:18px;
+    box-shadow:0 0 40px rgba(0,0,0,.65);
   }
 
-  .modal h1{
-    font-size:20px;
-    margin-bottom:5px;
+  .modal h2{
+    font-size:16px;
+    font-weight:900;
+    margin-bottom:6px;
   }
 
   .modal p{
-    font-size:13px;
+    font-size:12px;
     opacity:.7;
-    margin-bottom:18px;
+    margin-bottom:14px;
+    line-height:1.4;
   }
 
-  .error{
+  .input{
+    width:100%;
+    padding:12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(0,0,0,.15);
+    color:white;
+    outline:none;
+    margin-bottom:10px;
+    font-size:14px;
+  }
+
+  .modalActions{
+    display:flex;
+    gap:10px;
     margin-top:10px;
-    color:var(--red);
-    font-size:13px;
-    font-weight:700;
-    display:none;
   }
 
-  @media(max-width:900px){
+  .modalActions .btn{
+    flex:1;
+  }
+
+  /* Toast */
+  .toast{
+    position:fixed;
+    bottom:18px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(15,23,42,.95);
+    border:1px solid rgba(255,255,255,.12);
+    padding:12px 14px;
+    border-radius:14px;
+    font-size:13px;
+    font-weight:900;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+    z-index:99999;
+  }
+
+  .toast.show{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  /* Mobile */
+  @media(max-width:1050px){
+    .gridStats{
+      grid-template-columns:repeat(2, 1fr);
+    }
+  }
+
+  @media(max-width:850px){
     .sidebar{
       position:absolute;
       left:0;
       top:0;
       height:100dvh;
-      width:280px;
+      transform:translateX(-100%);
+      transition:.25s;
+      z-index:999;
+    }
+
+    .sidebar.show{
+      transform:translateX(0%);
+    }
+
+    .tableHead{
+      display:none;
+    }
+
+    .row{
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+
+    .actions{
+      justify-content:flex-start;
     }
   }
 </style>
@@ -315,209 +499,380 @@
 
 <body>
 
-<!-- LOGIN ADMIN -->
-<div class="modalBg" id="adminModal">
+<div class="toast" id="toast">Mensagem</div>
+
+<!-- LOGIN MODAL -->
+<div class="modalBg" id="loginModal" style="display:flex;">
   <div class="modal">
-    <h1>🛡️ Admin Login</h1>
-    <p>Digite o ADMIN_SECRET para acessar o painel.</p>
+    <h2>🛡️ NeoAdmin Login</h2>
+    <p>Digite o <b>ADMIN_SECRET</b> para acessar o painel administrativo.</p>
     <input id="adminSecret" class="input" placeholder="ADMIN_SECRET" type="password">
-    <button class="btn green" onclick="adminLogin()">Entrar</button>
-    <div class="error" id="adminError">Erro</div>
+    <div class="modalActions">
+      <button class="btn green" onclick="adminLogin()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE MODAL -->
+<div class="modalBg" id="createModal">
+  <div class="modal">
+    <h2>➕ Criar Usuário</h2>
+    <p>Crie uma nova conta para acessar o NeoAssist.</p>
+    <input id="createUser" class="input" placeholder="Usuário">
+    <input id="createPass" class="input" placeholder="Senha" type="password">
+
+    <div class="modalActions">
+      <button class="btn blue" onclick="closeModal('createModal')">Cancelar</button>
+      <button class="btn green" onclick="createUser()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modalBg" id="editModal">
+  <div class="modal">
+    <h2>✏️ Editar Usuário</h2>
+    <p>Altere usuário e/ou senha. Se deixar vazio, não muda.</p>
+    <input id="editUsername" class="input" placeholder="Novo usuário">
+    <input id="editPassword" class="input" placeholder="Nova senha" type="password">
+
+    <div class="modalActions">
+      <button class="btn blue" onclick="closeModal('editModal')">Cancelar</button>
+      <button class="btn green" onclick="saveEdit()">Salvar</button>
+    </div>
   </div>
 </div>
 
 <div class="app">
 
-  <!-- Sidebar -->
-  <div class="sidebar hidden" id="sidebar">
-    <div class="logo">🛡️ <div>Neo<span>Admin</span></div></div>
-
-    <div class="sectionTitle">MENU</div>
-    <div class="menuItem active" onclick="showTab('users')" id="tab-users">👤 Usuários</div>
-    <div class="menuItem" onclick="showTab('create')" id="tab-create">➕ Criar Conta</div>
-
-    <div class="sectionTitle">INFO</div>
-    <div class="mini">• Painel NeoAssist</div>
-    <div class="mini">• Controle total de contas</div>
-
-    <div class="mini" style="margin-top:auto;">⚡ NeoAdmin v1.0</div>
-  </div>
-
-  <!-- Main -->
-  <div class="main">
-    <div class="topbar">
-      <button class="menuBtn" onclick="toggleSidebar()">☰</button>
-      <h2 id="pageTitle">Usuários</h2>
-      <div class="status">
-        <span id="status">🔴 Offline</span>
-        <button class="logoutBtn" onclick="adminLogout()">Sair</button>
+  <div class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brandIcon">🛡️</div>
+      <div class="brandText">
+        <b>NeoAdmin</b>
+        <span>Painel NeoAssist</span>
       </div>
     </div>
 
-    <div class="content" id="contentArea">
+    <div class="menuTitle">CONTROLE</div>
+    <div class="menuItem active" id="menu-users" onclick="setPage('users')">
+      👤 Usuários <small id="totalUsers">0</small>
+    </div>
 
-      <!-- USERS -->
-      <div id="usersTab">
-        <div class="card">
-          <h3>📋 Lista de Usuários</h3>
-          <button class="btn green" onclick="loadUsers()">🔄 Atualizar Lista</button>
+    <div class="menuItem" id="menu-security" onclick="setPage('security')">
+      🔒 Segurança <small>Beta</small>
+    </div>
+
+    <div class="sidebarFooter">
+      <b>⚡ NeoAdmin PRO</b><br>
+      Controle total de usuários e acessos.
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topLeft">
+        <h1 id="pageTitle">Usuários</h1>
+        <span id="pageSub">Gerencie contas e acessos do NeoAssist</span>
+      </div>
+
+      <div class="topRight">
+        <div class="status" id="status">🔴 Offline</div>
+        <button class="logoutBtn" onclick="logout()">Sair</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="gridStats">
+        <div class="stat green">
+          <span>Usuários ativos</span>
+          <b id="statActive">0</b>
+        </div>
+
+        <div class="stat red">
+          <span>Usuários suspensos</span>
+          <b id="statSuspended">0</b>
+        </div>
+
+        <div class="stat blue">
+          <span>Total de contas</span>
+          <b id="statTotal">0</b>
+        </div>
+
+        <div class="stat yellow">
+          <span>Status do servidor</span>
+          <b id="statServer">---</b>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="searchBox">
+          🔎 <input id="search" placeholder="Buscar usuário..." oninput="renderUsers()">
+        </div>
+
+        <div class="filterRow">
+          <button class="btn blue" onclick="setFilter('all')">Todos</button>
+          <button class="btn green" onclick="setFilter('active')">Ativos</button>
+          <button class="btn red" onclick="setFilter('suspended')">Suspensos</button>
+          <button class="btn yellow" onclick="loadUsers()">Atualizar</button>
+          <button class="btn green" onclick="openModal('createModal')">+ Criar</button>
+        </div>
+      </div>
+
+      <div class="table">
+        <div class="tableHead">
+          <div>Conta</div>
+          <div>ID</div>
+          <div>Status</div>
+          <div style="text-align:right;">Ações</div>
         </div>
 
         <div id="usersList"></div>
       </div>
 
-      <!-- CREATE -->
-      <div id="createTab" style="display:none;">
-        <div class="card">
-          <h3>➕ Criar Nova Conta</h3>
-          <input class="input" id="newUser" placeholder="Novo usuário">
-          <input class="input" id="newPass" placeholder="Nova senha" type="password">
-          <button class="btn green" onclick="createUser()">Criar Conta</button>
-        </div>
-      </div>
-
     </div>
   </div>
-
 </div>
 
 <script>
   const API_BASE = "https://api-neoassist.onrender.com";
 
-  const adminModal = document.getElementById("adminModal");
-  const adminSecretInput = document.getElementById("adminSecret");
-  const adminError = document.getElementById("adminError");
+  let allUsers = [];
+  let currentFilter = "all";
+  let editUserId = null;
 
-  const usersTab = document.getElementById("usersTab");
-  const createTab = document.getElementById("createTab");
-  const usersList = document.getElementById("usersList");
-
-  const pageTitle = document.getElementById("pageTitle");
-  const status = document.getElementById("status");
   const sidebar = document.getElementById("sidebar");
+  const toast = document.getElementById("toast");
 
-  function toggleSidebar(){
-    sidebar.classList.toggle("hidden");
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(()=> toast.classList.remove("show"), 2500);
+  }
+
+  function openModal(id){
+    document.getElementById(id).style.display = "flex";
+  }
+
+  function closeModal(id){
+    document.getElementById(id).style.display = "none";
   }
 
   function getSecret(){
-    return localStorage.getItem("neoassist_admin_secret");
+    return localStorage.getItem("neoadmin_secret");
   }
 
-  function setSecret(secret){
-    localStorage.setItem("neoassist_admin_secret", secret);
+  function setSecret(s){
+    localStorage.setItem("neoadmin_secret", s);
   }
 
-  function adminLogout(){
-    localStorage.removeItem("neoassist_admin_secret");
-    adminModal.style.display = "flex";
+  function logout(){
+    localStorage.removeItem("neoadmin_secret");
+    openModal("loginModal");
+    showToast("Sessão encerrada.");
   }
 
   function adminLogin(){
-    const secret = adminSecretInput.value.trim();
+    const secret = document.getElementById("adminSecret").value.trim();
 
     if(!secret){
-      adminError.textContent = "Digite o ADMIN_SECRET.";
-      adminError.style.display = "block";
+      showToast("Digite o ADMIN_SECRET.");
       return;
     }
 
     setSecret(secret);
-    adminModal.style.display = "none";
+    closeModal("loginModal");
+    showToast("Login realizado!");
     loadUsers();
   }
 
-  function showTab(tab){
-    document.querySelectorAll(".menuItem").forEach(x => x.classList.remove("active"));
-
-    if(tab === "users"){
-      document.getElementById("tab-users").classList.add("active");
-      usersTab.style.display = "block";
-      createTab.style.display = "none";
-      pageTitle.textContent = "Usuários";
-      loadUsers();
-    }
-
-    if(tab === "create"){
-      document.getElementById("tab-create").classList.add("active");
-      usersTab.style.display = "none";
-      createTab.style.display = "block";
-      pageTitle.textContent = "Criar Conta";
-    }
-
-    if(window.innerWidth < 900){
-      sidebar.classList.add("hidden");
+  async function checkOnline(){
+    try{
+      const res = await fetch(API_BASE + "/health");
+      if(res.ok){
+        document.getElementById("status").textContent = "🟢 Online";
+        document.getElementById("statServer").textContent = "ON";
+      } else {
+        document.getElementById("status").textContent = "🔴 Offline";
+        document.getElementById("statServer").textContent = "OFF";
+      }
+    }catch(e){
+      document.getElementById("status").textContent = "🔴 Offline";
+      document.getElementById("statServer").textContent = "OFF";
     }
   }
 
   async function loadUsers(){
     if(!getSecret()){
-      adminModal.style.display = "flex";
+      openModal("loginModal");
       return;
     }
 
-    usersList.innerHTML = `<div class="card">Carregando usuários...</div>`;
+    document.getElementById("usersList").innerHTML = `
+      <div class="row">
+        <div style="opacity:.7;font-weight:900;">Carregando usuários...</div>
+      </div>
+    `;
 
     try{
       const res = await fetch(API_BASE + "/api/admin/users", {
-        headers: {
-          "X-Admin-Secret": getSecret()
-        }
+        headers: { "X-Admin-Secret": getSecret() }
       });
 
       const data = await res.json();
 
       if(data.error){
-        usersList.innerHTML = `<div class="card">Erro: ${data.error}</div>`;
+        showToast("Erro: " + data.error);
         return;
       }
 
-      if(!Array.isArray(data)){
-        usersList.innerHTML = `<div class="card">Erro inesperado.</div>`;
-        return;
-      }
-
-      usersList.innerHTML = "";
-
-      data.forEach(u => {
-        const div = document.createElement("div");
-        div.className = "userRow";
-
-        div.innerHTML = `
-          <div class="userTop">
-            <div class="userName">👤 ${u.username}</div>
-            <div class="badge ${u.status}">${u.status === "active" ? "ATIVO" : "SUSPENSO"}</div>
-          </div>
-
-          <div class="mini">ID: ${u._id}</div>
-
-          <div class="actions">
-            <button class="smallBtn yellow" onclick="editUserPrompt('${u._id}', '${u.username}')">✏️ Editar</button>
-
-            ${
-              u.status === "active"
-              ? `<button class="smallBtn red" onclick="suspendUser('${u._id}')">⛔ Suspender</button>`
-              : `<button class="smallBtn green" onclick="activateUser('${u._id}')">✅ Ativar</button>`
-            }
-
-            <button class="smallBtn red" onclick="deleteUser('${u._id}')">🗑️ Deletar</button>
-          </div>
-        `;
-
-        usersList.appendChild(div);
-      });
+      allUsers = data;
+      updateStats();
+      renderUsers();
+      showToast("Lista atualizada!");
 
     }catch(e){
-      usersList.innerHTML = `<div class="card">Erro ao conectar com backend.</div>`;
+      showToast("Erro ao conectar no backend.");
+    }
+  }
+
+  function updateStats(){
+    const active = allUsers.filter(u => u.status === "active").length;
+    const suspended = allUsers.filter(u => u.status === "suspended").length;
+    const total = allUsers.length;
+
+    document.getElementById("statActive").textContent = active;
+    document.getElementById("statSuspended").textContent = suspended;
+    document.getElementById("statTotal").textContent = total;
+    document.getElementById("totalUsers").textContent = total;
+  }
+
+  function setFilter(f){
+    currentFilter = f;
+    renderUsers();
+  }
+
+  function renderUsers(){
+    const list = document.getElementById("usersList");
+    const search = document.getElementById("search").value.toLowerCase().trim();
+
+    let users = [...allUsers];
+
+    if(currentFilter !== "all"){
+      users = users.filter(u => u.status === currentFilter);
+    }
+
+    if(search){
+      users = users.filter(u => u.username.toLowerCase().includes(search));
+    }
+
+    if(users.length === 0){
+      list.innerHTML = `
+        <div class="row">
+          <div style="opacity:.7;font-weight:900;">Nenhum usuário encontrado.</div>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = "";
+
+    users.forEach(u => {
+      const div = document.createElement("div");
+      div.className = "row";
+
+      div.innerHTML = `
+        <div>
+          <div class="userName">👤 ${u.username}</div>
+          <div class="userId">Criado: ${new Date(u.createdAt || Date.now()).toLocaleDateString()}</div>
+        </div>
+
+        <div style="font-size:12px;opacity:.7;font-weight:900;">
+          ${u._id}
+          <button class="smallBtn blue" style="margin-left:8px;" onclick="copyText('${u._id}')">📋</button>
+        </div>
+
+        <div>
+          <span class="badge ${u.status}">
+            ${u.status === "active" ? "ATIVO" : "SUSPENSO"}
+          </span>
+        </div>
+
+        <div class="actions">
+          <button class="smallBtn yellow" onclick="openEdit('${u._id}', '${u.username}')">✏️ Editar</button>
+
+          ${
+            u.status === "active"
+              ? `<button class="smallBtn red" onclick="suspendUser('${u._id}')">⛔ Suspender</button>`
+              : `<button class="smallBtn green" onclick="activateUser('${u._id}')">✅ Ativar</button>`
+          }
+
+          <button class="smallBtn red" onclick="deleteUser('${u._id}')">🗑️ Deletar</button>
+        </div>
+      `;
+
+      list.appendChild(div);
+    });
+  }
+
+  function copyText(txt){
+    navigator.clipboard.writeText(txt);
+    showToast("ID copiado!");
+  }
+
+  function openEdit(id, username){
+    editUserId = id;
+    document.getElementById("editUsername").value = username;
+    document.getElementById("editPassword").value = "";
+    openModal("editModal");
+  }
+
+  async function saveEdit(){
+    const username = document.getElementById("editUsername").value.trim();
+    const password = document.getElementById("editPassword").value.trim();
+
+    const body = {};
+    if(username) body.username = username;
+    if(password) body.password = password;
+
+    if(Object.keys(body).length === 0){
+      showToast("Nada para editar.");
+      return;
+    }
+
+    try{
+      const res = await fetch(API_BASE + "/api/admin/edit-user/" + editUserId, {
+        method:"PUT",
+        headers:{
+          "Content-Type":"application/json",
+          "X-Admin-Secret": getSecret()
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+
+      if(data.error){
+        showToast("Erro: " + data.error);
+        return;
+      }
+
+      closeModal("editModal");
+      showToast("Usuário editado!");
+      loadUsers();
+
+    }catch(e){
+      showToast("Erro ao conectar.");
     }
   }
 
   async function createUser(){
-    const username = document.getElementById("newUser").value.trim();
-    const password = document.getElementById("newPass").value.trim();
+    const username = document.getElementById("createUser").value.trim();
+    const password = document.getElementById("createPass").value.trim();
 
     if(!username || !password){
-      alert("Preencha usuário e senha.");
+      showToast("Preencha usuário e senha.");
       return;
     }
 
@@ -533,155 +888,4 @@
 
       const data = await res.json();
 
-      if(data.error){
-        alert("Erro: " + data.error);
-        return;
-      }
-
-      alert("Conta criada com sucesso!");
-      document.getElementById("newUser").value = "";
-      document.getElementById("newPass").value = "";
-      showTab("users");
-
-    }catch(e){
-      alert("Erro ao conectar no backend.");
-    }
-  }
-
-  async function deleteUser(id){
-    if(!confirm("Tem certeza que deseja deletar esse usuário?")) return;
-
-    try{
-      const res = await fetch(API_BASE + "/api/admin/delete-user/" + id, {
-        method:"DELETE",
-        headers:{
-          "X-Admin-Secret": getSecret()
-        }
-      });
-
-      const data = await res.json();
-
-      if(data.error){
-        alert("Erro: " + data.error);
-        return;
-      }
-
-      alert("Usuário deletado!");
-      loadUsers();
-
-    }catch(e){
-      alert("Erro ao conectar no backend.");
-    }
-  }
-
-  async function suspendUser(id){
-    try{
-      const res = await fetch(API_BASE + "/api/admin/suspend-user/" + id, {
-        method:"PATCH",
-        headers:{
-          "X-Admin-Secret": getSecret()
-        }
-      });
-
-      const data = await res.json();
-
-      if(data.error){
-        alert("Erro: " + data.error);
-        return;
-      }
-
-      loadUsers();
-
-    }catch(e){
-      alert("Erro ao conectar no backend.");
-    }
-  }
-
-  async function activateUser(id){
-    try{
-      const res = await fetch(API_BASE + "/api/admin/activate-user/" + id, {
-        method:"PATCH",
-        headers:{
-          "X-Admin-Secret": getSecret()
-        }
-      });
-
-      const data = await res.json();
-
-      if(data.error){
-        alert("Erro: " + data.error);
-        return;
-      }
-
-      loadUsers();
-
-    }catch(e){
-      alert("Erro ao conectar no backend.");
-    }
-  }
-
-  async function editUserPrompt(id, oldUsername){
-    const newUsername = prompt("Novo usuário (deixe vazio para não mudar):", oldUsername);
-    const newPassword = prompt("Nova senha (deixe vazio para não mudar):", "");
-
-    const body = {};
-    if(newUsername && newUsername.trim()) body.username = newUsername.trim();
-    if(newPassword && newPassword.trim()) body.password = newPassword.trim();
-
-    if(Object.keys(body).length === 0){
-      alert("Nada para editar.");
-      return;
-    }
-
-    try{
-      const res = await fetch(API_BASE + "/api/admin/edit-user/" + id, {
-        method:"PUT",
-        headers:{
-          "Content-Type":"application/json",
-          "X-Admin-Secret": getSecret()
-        },
-        body: JSON.stringify(body)
-      });
-
-      const data = await res.json();
-
-      if(data.error){
-        alert("Erro: " + data.error);
-        return;
-      }
-
-      alert("Usuário editado!");
-      loadUsers();
-
-    }catch(e){
-      alert("Erro ao conectar no backend.");
-    }
-  }
-
-  async function checkOnline(){
-    try{
-      const res = await fetch(API_BASE + "/health");
-      if(res.ok){
-        status.textContent = "🟢 Online";
-      } else {
-        status.textContent = "🔴 Offline";
-      }
-    }catch(e){
-      status.textContent = "🔴 Offline";
-    }
-  }
-
-  checkOnline();
-  setInterval(checkOnline, 15000);
-
-  // abrir modal se não tiver secret salvo
-  if(!getSecret()){
-    adminModal.style.display = "flex";
-  } else {
-    adminModal.style.display = "none";
-    loadUsers();
-  }
-</script>
-
-</body>
-  </html>
+      if(data.e
