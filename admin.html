@@ -673,35 +673,54 @@
     showToast("Sessão encerrada.");
   }
 
-  function adminLogin(){
-    const secret = document.getElementById("adminSecret").value.trim();
 
-    if(!secret){
-      showToast("Digite o ADMIN_SECRET.");
+ async function adminLogin(){
+  const secret = document.getElementById("adminSecret").value.trim();
+
+  if(!secret){
+    showToast("Digite o ADMIN_SECRET.");
+    return;
+  }
+
+  try{
+    // testa se a senha está correta chamando a rota admin
+    const res = await fetch(API_BASE + "/api/admin/users", {
+      headers: { "X-Admin-Secret": secret }
+    });
+
+    const data = await res.json();
+
+    if(!res.ok || data.error){
+      showToast("❌ ADMIN_SECRET incorreto!");
       return;
     }
 
+    // senha certa
     setSecret(secret);
     closeModal("loginModal");
-    showToast("Login realizado!");
+    showToast("✅ Login realizado!");
     loadUsers();
-  }
 
-  async function checkOnline(){
-    try{
-      const res = await fetch(API_BASE + "/health");
-      if(res.ok){
-        document.getElementById("status").textContent = "🟢 Online";
-        document.getElementById("statServer").textContent = "ON";
-      } else {
-        document.getElementById("status").textContent = "🔴 Offline";
-        document.getElementById("statServer").textContent = "OFF";
-      }
-    }catch(e){
+  }catch(e){
+    showToast("Erro ao conectar no backend.");
+  }
+}
+
+async function checkOnline(){
+  try{
+    const res = await fetch(API_BASE + "/health");
+    if(res.ok){
+      document.getElementById("status").textContent = "🟢 Online";
+      document.getElementById("statServer").textContent = "ON";
+    } else {
       document.getElementById("status").textContent = "🔴 Offline";
       document.getElementById("statServer").textContent = "OFF";
     }
+  }catch(e){
+    document.getElementById("status").textContent = "🔴 Offline";
+    document.getElementById("statServer").textContent = "OFF";
   }
+ }
 
   async function loadUsers(){
     if(!getSecret()){
