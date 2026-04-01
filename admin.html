@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>NeoAssist - Admin Panel</title>
+
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+
+  :root{
+    --bg:#0b1220;
+    --panel:#0f172a;
+    --card:rgba(255,255,255,.04);
+    --border:rgba(255,255,255,.08);
+    --green:#22c55e;
+    --red:#ef4444;
+    --yellow:#facc15;
+    --text:#fff;
+    --muted:rgba(255,255,255,.7);
+  }
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    overflow:hidden;
+  }
+
+  .app{
+    display:flex;
+    width:100%;
+    height:100dvh;
+    overflow:hidden;
+  }
+
+  /* Sidebar */
+  .sidebar{
+    width:300px;
+    background:var(--panel);
+    border-right:1px solid var(--border);
+    padding:15px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    transition:.25s;
+    z-index:10;
+  }
+
+  .sidebar.hidden{
+    transform:translateX(-100%);
+    position:absolute;
+    left:0;
+    top:0;
+    height:100dvh;
+  }
+
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:20px;
+    font-weight:800;
+    padding:10px;
+    border-radius:12px;
+    background:rgba(255,255,255,.03);
+  }
+
+  .logo span{color:var(--green)}
+
+  .sectionTitle{
+    font-size:12px;
+    opacity:.7;
+    margin-top:8px;
+  }
+
+  .menuItem{
+    padding:12px;
+    border-radius:12px;
+    cursor:pointer;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.03);
+    transition:.2s;
+    font-weight:700;
+    user-select:none;
+  }
+
+  .menuItem:hover{background:rgba(255,255,255,.06)}
+  .menuItem.active{
+    border:1px solid var(--green);
+    background:rgba(34,197,94,.15);
+  }
+
+  .mini{
+    font-size:12px;
+    opacity:.7;
+    margin-top:5px;
+    line-height:1.3;
+  }
+
+  /* Main */
+  .main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    height:100dvh;
+    overflow:hidden;
+  }
+
+  .topbar{
+    height:60px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 18px;
+    border-bottom:1px solid var(--border);
+    background:rgba(255,255,255,.02);
+  }
+
+  .menuBtn{
+    background:transparent;
+    border:none;
+    color:white;
+    font-size:24px;
+    cursor:pointer;
+  }
+
+  .topbar h2{
+    font-size:15px;
+    font-weight:800;
+  }
+
+  .topbar .status{
+    font-size:12px;
+    opacity:.7;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+
+  .logoutBtn{
+    background:transparent;
+    border:1px solid rgba(255,255,255,.15);
+    color:white;
+    padding:6px 10px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:700;
+  }
+
+  .logoutBtn:hover{
+    background:rgba(255,255,255,.06);
+  }
+
+  /* Content */
+  .content{
+    flex:1;
+    overflow-y:auto;
+    padding:16px;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:14px;
+  }
+
+  .card h3{
+    font-size:14px;
+    margin-bottom:10px;
+  }
+
+  .input{
+    width:100%;
+    padding:12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.12);
+    background:var(--bg);
+    color:white;
+    outline:none;
+    margin-bottom:10px;
+    font-size:14px;
+  }
+
+  .btn{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:14px;
+    font-weight:900;
+    cursor:pointer;
+    font-size:14px;
+    transition:.2s;
+  }
+
+  .btn.green{background:var(--green);color:#0b1220}
+  .btn.red{background:var(--red);color:white}
+  .btn.yellow{background:var(--yellow);color:#0b1220}
+
+  .btn:hover{opacity:.9}
+
+  .userRow{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding:14px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.02);
+    margin-bottom:10px;
+  }
+
+  .userTop{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .userName{
+    font-weight:900;
+    font-size:14px;
+  }
+
+  .badge{
+    font-size:12px;
+    padding:5px 10px;
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,.2);
+    opacity:.85;
+  }
+
+  .badge.active{border-color:rgba(34,197,94,.6); color:var(--green)}
+  .badge.suspended{border-color:rgba(239,68,68,.6); color:var(--red)}
+
+  .actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .smallBtn{
+    padding:8px 10px;
+    border:none;
+    border-radius:12px;
+    font-weight:900;
+    cursor:pointer;
+    font-size:12px;
+  }
+
+  .smallBtn.green{background:rgba(34,197,94,.2);border:1px solid rgba(34,197,94,.4);color:var(--green)}
+  .smallBtn.red{background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);color:var(--red)}
+  .smallBtn.yellow{background:rgba(250,204,21,.2);border:1px solid rgba(250,204,21,.4);color:var(--yellow)}
+  .smallBtn:hover{opacity:.85}
+
+  /* Modal Login */
+  .modalBg{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100dvh;
+    background:rgba(0,0,0,.65);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    padding:15px;
+  }
+
+  .modal{
+    width:100%;
+    max-width:380px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 0 30px rgba(0,0,0,.6);
+  }
+
+  .modal h1{
+    font-size:20px;
+    margin-bottom:5px;
+  }
+
+  .modal p{
+    font-size:13px;
+    opacity:.7;
+    margin-bottom:18px;
+  }
+
+  .error{
+    margin-top:10px;
+    color:var(--red);
+    font-size:13px;
+    font-weight:700;
+    display:none;
+  }
+
+  @media(max-width:900px){
+    .sidebar{
+      position:absolute;
+      left:0;
+      top:0;
+      height:100dvh;
+      width:280px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN ADMIN -->
+<div class="modalBg" id="adminModal">
+  <div class="modal">
+    <h1>🛡️ Admin Login</h1>
+    <p>Digite o ADMIN_SECRET para acessar o painel.</p>
+    <input id="adminSecret" class="input" placeholder="ADMIN_SECRET" type="password">
+    <button class="btn green" onclick="adminLogin()">Entrar</button>
+    <div class="error" id="adminError">Erro</div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- Sidebar -->
+  <div class="sidebar hidden" id="sidebar">
+    <div class="logo">🛡️ <div>Neo<span>Admin</span></div></div>
+
+    <div class="sectionTitle">MENU</div>
+    <div class="menuItem active" onclick="showTab('users')" id="tab-users">👤 Usuários</div>
+    <div class="menuItem" onclick="showTab('create')" id="tab-create">➕ Criar Conta</div>
+
+    <div class="sectionTitle">INFO</div>
+    <div class="mini">• Painel NeoAssist</div>
+    <div class="mini">• Controle total de contas</div>
+
+    <div class="mini" style="margin-top:auto;">⚡ NeoAdmin v1.0</div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <button class="menuBtn" onclick="toggleSidebar()">☰</button>
+      <h2 id="pageTitle">Usuários</h2>
+      <div class="status">
+        <span id="status">🔴 Offline</span>
+        <button class="logoutBtn" onclick="adminLogout()">Sair</button>
+      </div>
+    </div>
+
+    <div class="content" id="contentArea">
+
+      <!-- USERS -->
+      <div id="usersTab">
+        <div class="card">
+          <h3>📋 Lista de Usuários</h3>
+          <button class="btn green" onclick="loadUsers()">🔄 Atualizar Lista</button>
+        </div>
+
+        <div id="usersList"></div>
+      </div>
+
+      <!-- CREATE -->
+      <div id="createTab" style="display:none;">
+        <div class="card">
+          <h3>➕ Criar Nova Conta</h3>
+          <input class="input" id="newUser" placeholder="Novo usuário">
+          <input class="input" id="newPass" placeholder="Nova senha" type="password">
+          <button class="btn green" onclick="createUser()">Criar Conta</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API_BASE = "https://api-neoassist.onrender.com";
+
+  const adminModal = document.getElementById("adminModal");
+  const adminSecretInput = document.getElementById("adminSecret");
+  const adminError = document.getElementById("adminError");
+
+  const usersTab = document.getElementById("usersTab");
+  const createTab = document.getElementById("createTab");
+  const usersList = document.getElementById("usersList");
+
+  const pageTitle = document.getElementById("pageTitle");
+  const status = document.getElementById("status");
+  const sidebar = document.getElementById("sidebar");
+
+  function toggleSidebar(){
+    sidebar.classList.toggle("hidden");
+  }
+
+  function getSecret(){
+    return localStorage.getItem("neoassist_admin_secret");
+  }
+
+  function setSecret(secret){
+    localStorage.setItem("neoassist_admin_secret", secret);
+  }
+
+  function adminLogout(){
+    localStorage.removeItem("neoassist_admin_secret");
+    adminModal.style.display = "flex";
+  }
+
+  function adminLogin(){
+    const secret = adminSecretInput.value.trim();
+
+    if(!secret){
+      adminError.textContent = "Digite o ADMIN_SECRET.";
+      adminError.style.display = "block";
+      return;
+    }
+
+    setSecret(secret);
+    adminModal.style.display = "none";
+    loadUsers();
+  }
+
+  function showTab(tab){
+    document.querySelectorAll(".menuItem").forEach(x => x.classList.remove("active"));
+
+    if(tab === "users"){
+      document.getElementById("tab-users").classList.add("active");
+      usersTab.style.display = "block";
+      createTab.style.display = "none";
+      pageTitle.textContent = "Usuários";
+      loadUsers();
+    }
+
+    if(tab === "create"){
+      document.getElementById("tab-create").classList.add("active");
+      usersTab.style.display = "none";
+      createTab.style.display = "block";
+      pageTitle.textContent = "Criar Conta";
+    }
+
+    if(window.innerWidth < 900){
+      sidebar.classList.add("hidden");
+    }
+  }
+
+  async function loadUsers(){
+    if(!getSecret()){
+      adminModal.style.display = "flex";
+      return;
+    }
+
+    usersList.innerHTML = `<div class="card">Carregando usuários...</div>`;
+
+    try{
+      const res = await fetch(API_BASE + "/api/admin/users", {
+        headers: {
+          "X-Admin-Secret": getSecret()
+        }
+      });
+
+      const data = await res.json();
+
+      if(data.error){
+        usersList.innerHTML = `<div class="card">Erro: ${data.error}</div>`;
+        return;
+      }
+
+      if(!Array.isArray(data)){
+        usersList.innerHTML = `<div class="card">Erro inesperado.</div>`;
+        return;
+      }
+
+      usersList.innerHTML = "";
+
+      data.forEach(u => {
+        const div = document.createElement("div");
+        div.className = "userRow";
+
+        div.innerHTML = `
+          <div class="userTop">
+            <div class="userName">👤 ${u.username}</div>
+            <div class="badge ${u.status}">${u.status === "active" ? "ATIVO" : "SUSPENSO"}</div>
+          </div>
+
+          <div class="mini">ID: ${u._id}</div>
+
+          <div class="actions">
+            <button class="smallBtn yellow" onclick="editUserPrompt('${u._id}', '${u.username}')">✏️ Editar</button>
+
+            ${
+              u.status === "active"
+              ? `<button class="smallBtn red" onclick="suspendUser('${u._id}')">⛔ Suspender</button>`
+              : `<button class="smallBtn green" onclick="activateUser('${u._id}')">✅ Ativar</button>`
+            }
+
+            <button class="smallBtn red" onclick="deleteUser('${u._id}')">🗑️ Deletar</button>
+          </div>
+        `;
+
+        usersList.appendChild(div);
+      });
+
+    }catch(e){
+      usersList.innerHTML = `<div class="card">Erro ao conectar com backend.</div>`;
+    }
+  }
+
+  async function createUser(){
+    const username = document.getElementById("newUser").value.trim();
+    const password = document.getElementById("newPass").value.trim();
+
+    if(!username || !password){
+      alert("Preencha usuário e senha.");
+      return;
+    }
+
+    try{
+      const res = await fetch(API_BASE + "/api/admin/create-user", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "X-Admin-Secret": getSecret()
+        },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await res.json();
+
+      if(data.error){
+        alert("Erro: " + data.error);
+        return;
+      }
+
+      alert("Conta criada com sucesso!");
+      document.getElementById("newUser").value = "";
+      document.getElementById("newPass").value = "";
+      showTab("users");
+
+    }catch(e){
+      alert("Erro ao conectar no backend.");
+    }
+  }
+
+  async function deleteUser(id){
+    if(!confirm("Tem certeza que deseja deletar esse usuário?")) return;
+
+    try{
+      const res = await fetch(API_BASE + "/api/admin/delete-user/" + id, {
+        method:"DELETE",
+        headers:{
+          "X-Admin-Secret": getSecret()
+        }
+      });
+
+      const data = await res.json();
+
+      if(data.error){
+        alert("Erro: " + data.error);
+        return;
+      }
+
+      alert("Usuário deletado!");
+      loadUsers();
+
+    }catch(e){
+      alert("Erro ao conectar no backend.");
+    }
+  }
+
+  async function suspendUser(id){
+    try{
+      const res = await fetch(API_BASE + "/api/admin/suspend-user/" + id, {
+        method:"PATCH",
+        headers:{
+          "X-Admin-Secret": getSecret()
+        }
+      });
+
+      const data = await res.json();
+
+      if(data.error){
+        alert("Erro: " + data.error);
+        return;
+      }
+
+      loadUsers();
+
+    }catch(e){
+      alert("Erro ao conectar no backend.");
+    }
+  }
+
+  async function activateUser(id){
+    try{
+      const res = await fetch(API_BASE + "/api/admin/activate-user/" + id, {
+        method:"PATCH",
+        headers:{
+          "X-Admin-Secret": getSecret()
+        }
+      });
+
+      const data = await res.json();
+
+      if(data.error){
+        alert("Erro: " + data.error);
+        return;
+      }
+
+      loadUsers();
+
+    }catch(e){
+      alert("Erro ao conectar no backend.");
+    }
+  }
+
+  async function editUserPrompt(id, oldUsername){
+    const newUsername = prompt("Novo usuário (deixe vazio para não mudar):", oldUsername);
+    const newPassword = prompt("Nova senha (deixe vazio para não mudar):", "");
+
+    const body = {};
+    if(newUsername && newUsername.trim()) body.username = newUsername.trim();
+    if(newPassword && newPassword.trim()) body.password = newPassword.trim();
+
+    if(Object.keys(body).length === 0){
+      alert("Nada para editar.");
+      return;
+    }
+
+    try{
+      const res = await fetch(API_BASE + "/api/admin/edit-user/" + id, {
+        method:"PUT",
+        headers:{
+          "Content-Type":"application/json",
+          "X-Admin-Secret": getSecret()
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+
+      if(data.error){
+        alert("Erro: " + data.error);
+        return;
+      }
+
+      alert("Usuário editado!");
+      loadUsers();
+
+    }catch(e){
+      alert("Erro ao conectar no backend.");
+    }
+  }
+
+  async function checkOnline(){
+    try{
+      const res = await fetch(API_BASE + "/health");
+      if(res.ok){
+        status.textContent = "🟢 Online";
+      } else {
+        status.textContent = "🔴 Offline";
+      }
+    }catch(e){
+      status.textContent = "🔴 Offline";
+    }
+  }
+
+  checkOnline();
+  setInterval(checkOnline, 15000);
+
+  // abrir modal se não tiver secret salvo
+  if(!getSecret()){
+    adminModal.style.display = "flex";
+  } else {
+    adminModal.style.display = "none";
+    loadUsers();
+  }
+</script>
+
+</body>
+  </html>
