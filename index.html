@@ -14,6 +14,7 @@
     --card:rgba(255,255,255,.04);
     --border:rgba(255,255,255,.08);
     --green:#22c55e;
+    --red:#ef4444;
     --text:#fff;
     --muted:rgba(255,255,255,.7);
   }
@@ -24,11 +25,10 @@
     overflow:hidden;
   }
 
-  /* Para celular e teclado funcionar bem */
   .app{
     display:flex;
     width:100%;
-    height:100dvh; /* resolve bug do teclado */
+    height:100dvh;
     overflow:hidden;
   }
 
@@ -132,6 +132,24 @@
   .topbar .status{
     font-size:12px;
     opacity:.7;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+
+  .logoutBtn{
+    background:transparent;
+    border:1px solid rgba(255,255,255,.15);
+    color:white;
+    padding:6px 10px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:700;
+  }
+
+  .logoutBtn:hover{
+    background:rgba(255,255,255,.06);
   }
 
   /* Chat */
@@ -212,6 +230,76 @@
 
   .sendBtn:hover{opacity:.85}
 
+  /* Login Modal */
+  .modalBg{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100dvh;
+    background:rgba(0,0,0,.65);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    padding:15px;
+  }
+
+  .modal{
+    width:100%;
+    max-width:380px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 0 30px rgba(0,0,0,.6);
+  }
+
+  .modal h1{
+    font-size:20px;
+    margin-bottom:5px;
+  }
+
+  .modal p{
+    font-size:13px;
+    opacity:.7;
+    margin-bottom:18px;
+  }
+
+  .modal input{
+    width:100%;
+    padding:12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.12);
+    background:var(--bg);
+    color:white;
+    outline:none;
+    margin-bottom:12px;
+    font-size:14px;
+  }
+
+  .modal button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:14px;
+    font-weight:900;
+    cursor:pointer;
+    background:var(--green);
+    color:#0b1220;
+    font-size:14px;
+  }
+
+  .modal button:hover{opacity:.9}
+
+  .error{
+    margin-top:10px;
+    color:var(--red);
+    font-size:13px;
+    font-weight:700;
+    display:none;
+  }
+
   /* Mobile ajustes */
   @media(max-width:900px){
     .sidebar{
@@ -234,6 +322,22 @@
 </head>
 
 <body>
+
+<!-- MODAL LOGIN -->
+<div class="modalBg" id="loginModal">
+  <div class="modal">
+    <h1>🔐 NeoAssist Login</h1>
+    <p>Entre com seu usuário e senha para acessar o NeoAssist.</p>
+
+    <input id="loginUser" placeholder="Usuário" />
+    <input id="loginPass" placeholder="Senha" type="password" />
+
+    <button onclick="login()">Entrar</button>
+
+    <div class="error" id="loginError">Erro ao fazer login.</div>
+  </div>
+</div>
+
 <div class="app">
 
   <!-- Sidebar -->
@@ -255,7 +359,7 @@
     <div class="mini">• "Crie 10 questões com gabarito"</div>
     <div class="mini">• "Explique passo a passo"</div>
 
-    <div class="mini" style="margin-top:auto;">⚡ NeoAssist v1.2</div>
+    <div class="mini" style="margin-top:auto;">⚡ NeoAssist v2.0</div>
   </div>
 
   <!-- Main -->
@@ -263,7 +367,10 @@
     <div class="topbar">
       <button class="menuBtn" onclick="toggleSidebar()">☰</button>
       <h2 id="chatTitle">Chat Normal</h2>
-      <div class="status" id="status">🟢 Online</div>
+      <div class="status">
+        <span id="status">🔴 Offline</span>
+        <button class="logoutBtn" onclick="logout()">Sair</button>
+      </div>
     </div>
 
     <div class="chat" id="chat"></div>
@@ -277,7 +384,10 @@
 </div>
 
 <script>
-  const API_URL = "https://api-neoassist.onrender.com/api/chat";
+  const API_BASE = "https://api-neoassist.onrender.com";
+  const CHAT_API = API_BASE + "/api/chat";
+  const LOGIN_API = API_BASE + "/api/login";
+
   let currentChat = "normal";
 
   const sidebar = document.getElementById("sidebar");
@@ -286,8 +396,66 @@
   const input = document.getElementById("input");
   const status = document.getElementById("status");
 
+  const loginModal = document.getElementById("loginModal");
+  const loginUser = document.getElementById("loginUser");
+  const loginPass = document.getElementById("loginPass");
+  const loginError = document.getElementById("loginError");
+
   function toggleSidebar(){
     sidebar.classList.toggle("hidden");
+  }
+
+  function getToken(){
+    return localStorage.getItem("neoassist_token");
+  }
+
+  function setToken(token){
+    localStorage.setItem("neoassist_token", token);
+  }
+
+  function logout(){
+    localStorage.removeItem("neoassist_token");
+    localStorage.removeItem("neoassist_username");
+    loginModal.style.display = "flex";
+  }
+
+  async function login(){
+    const username = loginUser.value.trim();
+    const password = loginPass.value.trim();
+
+    loginError.style.display = "none";
+
+    if(!username || !password){
+      loginError.textContent = "Preencha usuário e senha.";
+      loginError.style.display = "block";
+      return;
+    }
+
+    try{
+      const res = await fetch(LOGIN_API, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await res.json();
+
+      if(data.error){
+        loginError.textContent = data.error;
+        loginError.style.display = "block";
+        return;
+      }
+
+      setToken(data.token);
+      localStorage.setItem("neoassist_username", data.username);
+
+      loginModal.style.display = "none";
+      renderChat();
+
+    }catch(e){
+      loginError.textContent = "Erro ao conectar no servidor.";
+      loginError.style.display = "block";
+    }
   }
 
   function loadChats(){
@@ -370,6 +538,11 @@
   }
 
   async function send(){
+    if(!getToken()){
+      loginModal.style.display = "flex";
+      return;
+    }
+
     const text = input.value.trim();
     if(!text) return;
 
@@ -390,9 +563,12 @@
     try{
       const history = chats[currentChat];
 
-      const res = await fetch(API_URL, {
+      const res = await fetch(CHAT_API, {
         method:"POST",
-        headers: {"Content-Type":"application/json"},
+        headers: {
+          "Content-Type":"application/json",
+          "Authorization": "Bearer " + getToken()
+        },
         body: JSON.stringify({
           message: text,
           mode: getMode(),
@@ -405,6 +581,11 @@
 
       if(data.error){
         addMessage("Erro: " + data.error, "bot");
+
+        if(data.error.toLowerCase().includes("token")){
+          logout();
+        }
+
         return;
       }
 
@@ -419,7 +600,6 @@
     }
   }
 
-  // Auto resize textarea (igual ChatGPT)
   function autoResize(){
     input.style.height = "auto";
     input.style.height = Math.min(input.scrollHeight, 140) + "px";
@@ -427,7 +607,6 @@
 
   input.addEventListener("input", autoResize);
 
-  // Enter envia / Shift+Enter quebra linha
   input.addEventListener("keydown", function(e){
     if(e.key === "Enter" && !e.shiftKey){
       e.preventDefault();
@@ -435,10 +614,9 @@
     }
   });
 
-  // Checar se API está online
   async function checkOnline(){
     try{
-      const res = await fetch("https://api-neoassist.onrender.com/health");
+      const res = await fetch(API_BASE + "/health");
       if(res.ok){
         status.textContent = "🟢 Online";
       } else {
@@ -453,6 +631,13 @@
   openChat("normal");
   checkOnline();
   setInterval(checkOnline, 15000);
+
+  // Se não tiver token, abre modal login
+  if(!getToken()){
+    loginModal.style.display = "flex";
+  } else {
+    loginModal.style.display = "none";
+  }
 </script>
 
 </body>
