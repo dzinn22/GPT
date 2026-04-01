@@ -637,7 +637,7 @@
 
 <script>
   const API_BASE = "https://api-neoassist.onrender.com";
-
+ 
   let allUsers = [];
   let currentFilter = "all";
   let editUserId = null;
@@ -707,27 +707,35 @@
 }
 
 async function checkOnline(){
+ try{
+async function checkOnline(){
   try{
-    const res = await fetch(API_BASE + "/health");
+    const res = await fetch(API_BASE + "/health", { cache: "no-store" });
+
     if(res.ok){
-      document.getElementById("status").textContent = "🟢 Online";
-      document.getElementById("statServer").textContent = "ON";
-    } else {
-      document.getElementById("status").textContent = "🔴 Offline";
-      document.getElementById("statServer").textContent = "OFF";
+      const data = await res.json();
+
+      if(data.online){
+        document.getElementById("status").textContent = "🟢 Online";
+        document.getElementById("statServer").textContent = "ON";
+        return;
+      }
     }
+
+    document.getElementById("status").textContent = "🔴 Offline";
+    document.getElementById("statServer").textContent = "OFF";
+
   }catch(e){
     document.getElementById("status").textContent = "🔴 Offline";
     document.getElementById("statServer").textContent = "OFF";
   }
+}
+
+async function loadUsers(){
+  if(!getSecret()){
+    openModal("loginModal");
+    return;
  }
-
-  async function loadUsers(){
-    if(!getSecret()){
-      openModal("loginModal");
-      return;
-    }
-
     document.getElementById("usersList").innerHTML = `
       <div class="row">
         <div style="opacity:.7;font-weight:900;">Carregando usuários...</div>
