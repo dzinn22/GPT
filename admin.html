@@ -674,13 +674,11 @@
   }
 
 
- async function adminLogin(){
-  const secret = document.getElementById("adminSecret").value.trim();
+const ADMIN_SECRET_DEFAULT = "satoru2025";
 
-  if(!secret){
-    showToast("Digite o ADMIN_SECRET.");
-    return;
-  }
+async function adminLogin(){
+  const input = document.getElementById("adminSecret");
+  const secret = (input?.value || "").trim() || ADMIN_SECRET_DEFAULT;
 
   try{
     // testa se a senha está correta chamando a rota admin
@@ -704,7 +702,7 @@
   }catch(e){
     showToast("Erro ao conectar no backend.");
   }
-}
+ }
 
 async function checkOnline(){
  try{
