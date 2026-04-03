@@ -137,6 +137,20 @@
     align-items:center;
   }
 
+  .userCircle{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:rgba(34,197,94,.18);
+    border:1px solid rgba(34,197,94,.35);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    font-size:13px;
+    color:var(--green);
+  }
+
   /* Chat */
   .chat{
     flex:1;
@@ -175,7 +189,7 @@
     font-style:italic;
   }
 
-  /* Input fixed bottom */
+  /* Input */
   .inputArea{
     flex-shrink:0;
     padding:12px;
@@ -215,6 +229,77 @@
 
   .sendBtn:hover{opacity:.85}
 
+  /* Login Modal */
+  .modalBg{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100dvh;
+    background:rgba(0,0,0,.7);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    padding:15px;
+  }
+
+  .modal{
+    width:100%;
+    max-width:380px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 0 30px rgba(0,0,0,.6);
+  }
+
+  .modal h1{
+    font-size:18px;
+    margin-bottom:6px;
+  }
+
+  .modal p{
+    font-size:13px;
+    opacity:.7;
+    margin-bottom:18px;
+  }
+
+  .modal input{
+    width:100%;
+    padding:12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.12);
+    background:var(--bg);
+    color:white;
+    outline:none;
+    margin-bottom:12px;
+    font-size:14px;
+  }
+
+  .modal button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:14px;
+    font-weight:900;
+    cursor:pointer;
+    background:var(--green);
+    color:#0b1220;
+    font-size:14px;
+  }
+
+  .modal button:hover{opacity:.9}
+
+  .error{
+    margin-top:10px;
+    color:var(--red);
+    font-size:13px;
+    font-weight:700;
+    display:none;
+  }
+
+  /* Mobile */
   @media(max-width:900px){
     .sidebar{
       position:absolute;
@@ -224,18 +309,35 @@
       width:280px;
     }
 
-    .sendBtn{
-      width:80px;
-    }
-
-    textarea{
-      font-size:15px;
-    }
+    .sendBtn{width:80px;}
+    textarea{font-size:15px;}
   }
 </style>
 </head>
 
 <body>
+
+<!-- LOGIN EMAIL -->
+<div class="modalBg" id="emailModal">
+  <div class="modal">
+    <h1>📧 Login NeoAssist</h1>
+    <p>Digite seu email para receber um código de acesso.</p>
+    <input id="emailInput" placeholder="ex: snownitrada11@gmail.com">
+    <button onclick="sendCode()">Enviar Código</button>
+    <div class="error" id="emailError">Erro.</div>
+  </div>
+</div>
+
+<!-- LOGIN CODE -->
+<div class="modalBg" id="codeModal" style="display:none;">
+  <div class="modal">
+    <h1>🔐 Digite o Código</h1>
+    <p>Enviamos um código para seu email.</p>
+    <input id="codeInput" placeholder="Código de 6 dígitos">
+    <button onclick="verifyCode()">Confirmar</button>
+    <div class="error" id="codeError">Erro.</div>
+  </div>
+</div>
 
 <div class="app">
 
@@ -258,7 +360,7 @@
     <div class="mini">• "Crie 10 questões com gabarito"</div>
     <div class="mini">• "Explique passo a passo"</div>
 
-    <div class="mini" style="margin-top:auto;">⚡ NeoAssist v2.0</div>
+    <div class="mini" style="margin-top:auto;">⚡ NeoAssist v3.0</div>
   </div>
 
   <!-- Main -->
@@ -266,8 +368,10 @@
     <div class="topbar">
       <button class="menuBtn" onclick="toggleSidebar()">☰</button>
       <h2 id="chatTitle">Chat Normal</h2>
+
       <div class="status">
         <span id="status">🔴 Offline</span>
+        <div class="userCircle" id="userCircle" title="Conta">?</div>
       </div>
     </div>
 
@@ -283,7 +387,12 @@
 
 <script>
   const API_BASE = "https://api-neoassist.onrender.com";
+
   const CHAT_API = API_BASE + "/api/chat";
+  const SEND_CODE_API = API_BASE + "/api/auth/send-code";
+  const VERIFY_CODE_API = API_BASE + "/api/auth/verify-code";
+  const GET_CHATS_API = API_BASE + "/api/chats";
+  const SAVE_CHATS_API = API_BASE + "/api/chats/save";
 
   let currentChat = "normal";
 
@@ -293,11 +402,59 @@
   const input = document.getElementById("input");
   const status = document.getElementById("status");
 
+  const emailModal = document.getElementById("emailModal");
+  const codeModal = document.getElementById("codeModal");
+
+  const emailInput = document.getElementById("emailInput");
+  const codeInput = document.getElementById("codeInput");
+
+  const emailError = document.getElementById("emailError");
+  const codeError = document.getElementById("codeError");
+
+  const userCircle = document.getElementById("userCircle");
+
   function toggleSidebar(){
     sidebar.classList.toggle("hidden");
   }
 
-  function loadChats(){
+  // Fecha sidebar ao clicar fora
+  document.addEventListener("click", (e)=>{
+    if(window.innerWidth < 900){
+      if(!sidebar.classList.contains("hidden")){
+        if(!sidebar.contains(e.target) && !e.target.classList.contains("menuBtn")){
+          sidebar.classList.add("hidden");
+        }
+      }
+    }
+  });
+
+  function getToken(){
+    return localStorage.getItem("neoassist_token");
+  }
+
+  function setToken(token){
+    localStorage.setItem("neoassist_token", token);
+  }
+
+  function setEmail(email){
+    localStorage.setItem("neoassist_email", email);
+  }
+
+  function getEmail(){
+    return localStorage.getItem("neoassist_email");
+  }
+
+  function updateUserCircle(){
+    const email = getEmail();
+    if(!email){
+      userCircle.textContent = "?";
+      return;
+    }
+    userCircle.textContent = email.trim()[0].toUpperCase();
+    userCircle.title = email;
+  }
+
+  function loadChatsLocal(){
     let saved = localStorage.getItem("neoassist_chats");
     if(!saved){
       localStorage.setItem("neoassist_chats", JSON.stringify({
@@ -325,6 +482,27 @@
     div.textContent = text;
     chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;
+  }
+
+  // efeito digitando
+  async function typeMessage(text){
+    const div = document.createElement("div");
+    div.className = "msg bot";
+    chat.appendChild(div);
+
+    let i = 0;
+    const speed = 10;
+
+    function step(){
+      div.textContent = text.slice(0, i);
+      i++;
+      chat.scrollTop = chat.scrollHeight;
+      if(i <= text.length){
+        setTimeout(step, speed);
+      }
+    }
+
+    step();
   }
 
   function renderChat(){
@@ -370,13 +548,18 @@
       exercicios: "Estudante - Exercícios",
       materias: "Estudante - Matérias",
       trabalhos: "Estudante - Trabalhos",
-      redacao: "Estudante - Redação",
+      redacao: "Estudante - Redação ENEM",
       cronograma: "Estudante - Cronograma"
     };
     return modes[currentChat] || "Normal";
   }
 
   async function send(){
+    if(!getToken()){
+      emailModal.style.display = "flex";
+      return;
+    }
+
     const text = input.value.trim();
     if(!text) return;
 
@@ -401,7 +584,7 @@
         method:"POST",
         headers: {
           "Content-Type":"application/json",
-          "X-Access-Key": "ss5"
+          "Authorization": "Bearer " + getToken()
         },
         body: JSON.stringify({
           message: text,
@@ -421,12 +604,45 @@
       chats[currentChat].push({ role: "assistant", content: data.reply });
       saveAllChats(chats);
 
+      // salva no mongodb
+      await saveChatsMongo(chats);
+
       renderChat();
 
     }catch(err){
       typingDiv.remove();
       addMessage("Erro ao conectar no backend. Aguarde e tente novamente.", "bot");
     }
+  }
+
+  async function saveChatsMongo(chats){
+    try{
+      await fetch(SAVE_CHATS_API, {
+        method: "POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization": "Bearer " + getToken()
+        },
+        body: JSON.stringify({ chats })
+      });
+    }catch(e){}
+  }
+
+  async function loadChatsMongo(){
+    try{
+      const res = await fetch(GET_CHATS_API, {
+        headers:{
+          "Authorization": "Bearer " + getToken()
+        }
+      });
+
+      const data = await res.json();
+
+      if(data.chats){
+        saveAllChats(data.chats);
+      }
+
+    }catch(e){}
   }
 
   function autoResize(){
@@ -443,16 +659,12 @@
     }
   });
 
-  // ✅ CHECK ONLINE MELHORADO (resolve seu problema)
   async function checkOnline(){
     try{
-      const res = await fetch(API_BASE + "/health", {
-        cache: "no-store"
-      });
+      const res = await fetch(API_BASE + "/health", { cache: "no-store" });
 
       if(res.ok){
         const data = await res.json();
-
         if(data.online){
           status.textContent = "🟢 Online";
           return;
@@ -466,11 +678,106 @@
     }
   }
 
-  loadChats();
+  // ==========================
+  // LOGIN FLOW
+  // ==========================
+  async function sendCode(){
+    const email = emailInput.value.trim();
+    emailError.style.display = "none";
+
+    if(!email || !email.includes("@")){
+      emailError.textContent = "Digite um email válido.";
+      emailError.style.display = "block";
+      return;
+    }
+
+    try{
+      const res = await fetch(SEND_CODE_API, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ email })
+      });
+
+      const data = await res.json();
+
+      if(data.error){
+        emailError.textContent = data.error;
+        emailError.style.display = "block";
+        return;
+      }
+
+      setEmail(email);
+
+      emailModal.style.display = "none";
+      codeModal.style.display = "flex";
+
+    }catch(e){
+      emailError.textContent = "Erro ao conectar no servidor.";
+      emailError.style.display = "block";
+    }
+  }
+
+  async function verifyCode(){
+    const email = getEmail();
+    const code = codeInput.value.trim();
+    codeError.style.display = "none";
+
+    if(!code || code.length < 6){
+      codeError.textContent = "Digite o código de 6 dígitos.";
+      codeError.style.display = "block";
+      return;
+    }
+
+    try{
+      const res = await fetch(VERIFY_CODE_API, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ email, code })
+      });
+
+      const data = await res.json();
+
+      if(data.error){
+        codeError.textContent = data.error;
+        codeError.style.display = "block";
+        return;
+      }
+
+      setToken(data.token);
+      setEmail(data.email);
+
+      updateUserCircle();
+
+      codeModal.style.display = "none";
+
+      await loadChatsMongo();
+      renderChat();
+
+    }catch(e){
+      codeError.textContent = "Erro ao conectar no servidor.";
+      codeError.style.display = "block";
+    }
+  }
+
+  // ==========================
+  // START
+  // ==========================
+  loadChatsLocal();
   openChat("normal");
 
+  updateUserCircle();
   checkOnline();
   setInterval(checkOnline, 10000);
+
+  // se não tiver token, pede login
+  if(!getToken()){
+    emailModal.style.display = "flex";
+    codeModal.style.display = "none";
+  } else {
+    emailModal.style.display = "none";
+    codeModal.style.display = "none";
+    loadChatsMongo();
+  }
 </script>
 
 </body>
